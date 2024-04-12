@@ -13,21 +13,20 @@ class Conta_agua:
             # Lendo o arquivo CSV para o DataFrame
             self.dataframe = pd.read_csv(self.caminho_arquivo)
 
-            # Renomeando as colunas para corresponder à tabela do banco de dados
             self.dataframe.rename(columns={
-                'Conta do Mês': 'ContaDoMes',
-                'Vencimento': 'Vencimento',
-                'Emissão': 'Emissao',
-                'Leitura Anterior': 'LeituraAnterior',
-                'Leitura Atual': 'LeituraAtual',
-                'Consumo de Água m³': 'ConsumoDeAguaM3',
-                'Consumo de Esgoto m³': 'ConsumoDeEsgotoM3',
-                'Valor Água R$': 'ValorAguaR$',
-                'Valor Esgoto R$': 'ValorEsgotoR$',
-                'Total R$': 'TotalR$',
-                'Nível de Informações da Fatura': 'NivelDeInformacoesDaFatura',
-                'Código de Ligação (RGI)': 'CodigoDeLigacaoRGI',
-                'Hidrômetro': 'Hidrometro'
+                'Conta do Mês': 'contadomes',
+                'Vencimento': 'vencimento',
+                'Emissão': 'emissao',
+                'Leitura Anterior': 'leituraanterior',
+                'Leitura Atual': 'leituraatual',
+                'Consumo de Água m³': 'consumodeaguam3',  # Ajuste no nome para minúsculas e sem espaço
+                'Consumo de Esgoto m³': 'consumodeesgotom3',  # Ajuste no nome para minúsculas e sem espaço
+                'Valor Água R$': 'valoraguar$',  # Verifique o nome original no CSV
+                'Valor Esgoto R$': 'valoresgotor$',  # Correção de digitação, deve ser 'valoresgotor$'
+                'Total R$': 'totalr$',  # Correção de digitação
+                'Nível de Informações da Fatura': 'niveldeinformacoesdafatura',
+                'Código de Ligação (RGI)': 'codigodeligacaorgi',
+                'Hidrômetro': 'hidrometro'
             }, inplace=True)
 
         except Exception as e:
@@ -75,9 +74,9 @@ class Conta_agua:
             return
 
         colunas_selecionadas = [
-            'ContaDoMes', 'Vencimento', 'Emissao', 'LeituraAnterior', 'LeituraAtual',
-            'ConsumoDeAguaM3', 'ConsumoDeEsgotoM3', 'ValorAguaR$', 'ValorEsgotoR$', 'TotalR$',
-            'NivelDeInformacoesDaFatura', 'CodigoDeLigacaoRGI', 'Hidrometro'
+            'contadomes', 'vencimento', 'emissao', 'leituraanterior', 'leituraatual',
+            'consumodeaguam3', 'consumodeesgotom3', 'valoraguar$', 'valoresgotor$', 'totalr$',
+            'niveldeinformacoesdafatura', 'codigodeligacaorgi', 'hidrometro'
         ]
 
         # Filtrar o DataFrame para conter apenas as colunas selecionadas
@@ -104,11 +103,12 @@ caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\etl\data\raw\pro_agua.csv'
 conta_agua = Conta_agua(caminho_arquivo)
 conta_agua.leitura_conta_agua()
 conta_agua.transformar_data(
-    ['ContaDoMes', 'Vencimento', 'Emissao', 'LeituraAnterior', 'LeituraAtual']
+    ['contadomes', 'vencimento', 'emissao', 'leituraanterior', 'leituraatual']
 )
-conta_agua.transformar_valores(['ValorAguaR$', 'ValorEsgotoR$', 'TotalR$', 'ConsumoDeAguaM3', 'ConsumoDeEsgotoM3'])
+conta_agua.transformar_valores(['valoraguar$', 'valoresgotor$',
+                                'totalr$', 'consumodeaguam3', 'consumodeesgotom3'])
 
 conta_agua.conectar_banco()
-conta_agua.inserir_banco('contaagua')
-conta_agua.gerar_relatorio('Arquivos_inseridos.csv', ['ContaDoMes', 'Vencimento',
-                                                      'Emissao', 'LeituraAnterior', 'LeituraAtual'])
+conta_agua.inserir_banco('conta_agua')
+conta_agua.gerar_relatorio('Arquivos_inseridos.csv', ['contadomes', 'vencimento',
+                                                      'emissao', 'leituraanterior', 'leituraatual'])
