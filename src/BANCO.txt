@@ -1,0 +1,16 @@
+CREATE TABLE ContaAgua (
+	`ID` INT PRIMARY KEY auto_increment,
+    `ContaDoMes` DATE,
+    `Vencimento` DATE,
+    `Emissao` DATE,
+    `LeituraAnterior` DATE,
+    `LeituraAtual` DATE,
+    `ConsumoDeAguaM3` DECIMAL(10, 3),
+    `ConsumoDeEsgotoM3` DECIMAL(10, 3),
+    `ValorAguaR$` DECIMAL(10, 2),
+    `ValorEsgotoR$` DECIMAL(10, 2),
+    `TotalR$` DECIMAL(10, 2),
+    `NivelDeInformacoesDaFatura` VARCHAR(255),
+    `CodigoDeLigacaoRGI` VARCHAR(255),
+    `Hidrometro` VARCHAR(255)
+);
