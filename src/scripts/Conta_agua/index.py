@@ -19,11 +19,11 @@ class Conta_agua:
                 'Emissão': 'emissao',
                 'Leitura Anterior': 'leituraanterior',
                 'Leitura Atual': 'leituraatual',
-                'Consumo de Água m³': 'consumodeaguam3',  # Ajuste no nome para minúsculas e sem espaço
-                'Consumo de Esgoto m³': 'consumodeesgotom3',  # Ajuste no nome para minúsculas e sem espaço
-                'Valor Água R$': 'valoraguar$',  # Verifique o nome original no CSV
-                'Valor Esgoto R$': 'valoresgotor$',  # Correção de digitação, deve ser 'valoresgotor$'
-                'Total R$': 'totalr$',  # Correção de digitação
+                'Consumo de Água m³': 'consumodeaguam3',
+                'Consumo de Esgoto m³': 'consumodeesgotom3',
+                'Valor Água R$': 'valoraguar$',
+                'Valor Esgoto R$': 'valoresgotor$',
+                'Total R$': 'totalr$',
                 'Nível de Informações da Fatura': 'niveldeinformacoesdafatura',
                 'Código de Ligação (RGI)': 'codigodeligacaorgi',
                 'Hidrômetro': 'hidrometro'
@@ -98,17 +98,3 @@ class Conta_agua:
         print(f"Relatório gerado com sucesso: {nome_arquivo}")
 
 
-# Exemplo de como você deve instanciar e usar a sua classe
-caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\etl\data\raw\pro_agua.csv'
-conta_agua = Conta_agua(caminho_arquivo)
-conta_agua.leitura_conta_agua()
-conta_agua.transformar_data(
-    ['contadomes', 'vencimento', 'emissao', 'leituraanterior', 'leituraatual']
-)
-conta_agua.transformar_valores(['valoraguar$', 'valoresgotor$',
-                                'totalr$', 'consumodeaguam3', 'consumodeesgotom3'])
-
-conta_agua.conectar_banco()
-conta_agua.inserir_banco('conta_agua')
-conta_agua.gerar_relatorio('Arquivos_inseridos.csv', ['contadomes', 'vencimento',
-                                                      'emissao', 'leituraanterior', 'leituraatual'])

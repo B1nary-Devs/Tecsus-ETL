@@ -1,10 +1,6 @@
 from sqlalchemy import create_engine
 import pandas as pd
 
-
-from sqlalchemy import create_engine
-import pandas as pd
-
 class Contrato_agua:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
@@ -16,21 +12,27 @@ class Contrato_agua:
             self.dataframe = pd.read_csv(self.caminho_arquivo)
             self.dataframe.rename(columns={
                 'Nome do Contrato': 'nome_do_contrato',
+                'Fornecedor': 'fornecedor',
                 'Forma de Pagamento': 'forma_de_pagamento',
                 'Tipo de Acesso a Distribuidora': 'tipo_de_acesso',
                 'Vigência Inicial': 'vigencia_inicial',
                 'Vigência Final': 'vigencia_final',
                 'Observação': 'observacao',
                 'Número Cliente': 'numero_cliente',
-                'Campo Extra 3': 'cnpj',
+                'Campo Extra 3': 'cnpj1',
+                'Campo Extra 4': 'cnpj2',
                 'Tipo de Consumidor': 'tipo_de_consumidor',
                 'Modelo de Faturamento': 'modelo_de_faturamento',
                 'Código de Ligação (RGI)': 'codigo_de_ligacao_rgi',
                 'Endereço de Instalação': 'endereco_de_instalacao',
                 'Número Medidor': 'numero_medidor',
-                'Hidrômetro': 'hidrometro'
+                'Hidrômetro': 'hidrometro',
+                'Ativado': 'ativado',
+                'Campo Extra 1': 'nome'
             }, inplace=True)
+
             self.formatar_cnpj()
+            self.unificar_cnpj()
             self.transformar_data(['vigencia_inicial', 'vigencia_final'])
         except Exception as e:
             print(f'Erro ao ler o arquivo {self.caminho_arquivo}: {e}')
@@ -55,9 +57,13 @@ class Contrato_agua:
 
     def formatar_cnpj(self):
         # Converter a coluna 'cnpj' para string
-        self.dataframe['cnpj'] = self.dataframe['cnpj'].astype(str)
+        self.dataframe['cnpj1'] = self.dataframe['cnpj1'].astype(str)
         # Remover caracteres não numéricos
-        self.dataframe['cnpj'] = self.dataframe['cnpj'].str.replace(r'\D', '', regex=True)
+        self.dataframe['cnpj1'] = self.dataframe['cnpj1'].str.replace(r'\D', '', regex=True)
+
+        self.dataframe['cnpj2'] = self.dataframe['cnpj2'].astype(str)
+        # Remover caracteres não numéricos
+        self.dataframe['cnpj2'] = self.dataframe['cnpj2'].str.replace(r'\D', '', regex=True)
 
     def inserir_banco(self, tabela):
         if self.engine is None:
@@ -65,10 +71,10 @@ class Contrato_agua:
             return
 
         # Filtering the DataFrame to include only the columns that exist in the database table
-        columns_expected = ['nome_do_contrato', 'forma_de_pagamento', 'tipo_de_acesso', 'vigencia_inicial',
+        columns_expected = ['nome_do_contrato','fornecedor', 'forma_de_pagamento', 'tipo_de_acesso', 'vigencia_inicial',
                             'vigencia_final', 'observacao', 'numero_cliente', 'cnpj', 'tipo_de_consumidor',
                             'modelo_de_faturamento', 'codigo_de_ligacao_rgi', 'endereco_de_instalacao', 'numero_medidor',
-                            'hidrometro']
+                            'hidrometro', 'ativado', 'nome']
         df_filtered = self.dataframe[columns_expected]
 
 
@@ -86,10 +92,10 @@ class Contrato_agua:
         except Exception as e:
             print(f"Erro ao gerar relatório: {e}")
 
-# Example usage:
-caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\etl\data\raw\con_agua.csv'
-contrato_agua = Contrato_agua(caminho_arquivo)
-contrato_agua.leitura_conta_agua()
-contrato_agua.conectar_banco()
-contrato_agua.inserir_banco('contrato_agua')
-contrato_agua.gerar_relatorio('Arquivos_inseridos_contrato.csv')
+    def unificar_cnpj(self):
+        # Combina 'cnpj' e 'cnpj2' dando preferência para 'cnpj' se ambos forem não-nulos
+        self.dataframe['cnpj'] = self.dataframe.apply(
+            lambda row: row['cnpj1'] if pd.notna(row['cnpj1']) else row['cnpj2'], axis=1
+        )
+        self.dataframe.drop(columns=['cnpj1', 'cnpj2'], inplace=True)  # Optional: remove old columns
+
