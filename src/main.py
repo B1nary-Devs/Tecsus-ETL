@@ -162,9 +162,9 @@ def main(folder_path):
     for csv_file in csv_files:
         nome = os.path.basename(csv_file).lower()
         if 'pro_agua' in nome:
-            processar_dimensoes_agua(csv_file)
-        elif 'con_agua' in nome:
             processar_fato_agua(csv_file)
+        elif 'con_agua' in nome:
+            processar_dimensoes_agua(csv_file)
 
         elif 'con_energia' in nome:
             print('Processando contrato de energia para:', csv_file)

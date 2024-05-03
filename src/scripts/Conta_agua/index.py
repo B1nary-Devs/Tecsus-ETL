@@ -356,17 +356,17 @@ class ProcessamentoDadosFato:
         return self.dataframe
 
 
-caminho_arquivo = r'caminho do arquivo'
-banco = 'mysql+pymysql://root:12345@localhost/contas' # url de conexao
-
-processador = ProcessamentoDadosFato(caminho_arquivo, banco)
-df_tratado = processador.executar_etl()
-
-tempo = TempoFato(df_tratado)
-tempo.conectar_banco(banco)
-tempo.inserir_banco()
-
-agua = FatoAgua(df_tratado)
-agua.conectar_banco(banco)
-agua.inserir_banco()
+# caminho_arquivo = r'caminho do arquivo'
+# banco = 'mysql+pymysql://root:12345@localhost/contas' # url de conexao
+#
+# processador = ProcessamentoDadosFato(caminho_arquivo, banco)
+# df_tratado = processador.executar_etl()
+#
+# tempo = TempoFato(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+# agua = FatoAgua(df_tratado)
+# agua.conectar_banco(banco)
+# agua.inserir_banco()
 

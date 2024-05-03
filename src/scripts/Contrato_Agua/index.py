@@ -425,25 +425,25 @@ class ProcessamentoDadosDimensao:
         return self.dataframe
 
 
-caminho_arquivo = r'caminho do arquivo'
-banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
-processador = ProcessamentoDadosDimensao(caminho_arquivo)
-df_tratado = processador.executar_etl()
-
-tempo = TempoDimensao(df_tratado)
-tempo.conectar_banco(banco)
-tempo.inserir_banco()
-
-
-contrato = Contrato_agua(df_tratado)
-contrato.conectar_banco(banco)
-contrato.inserir_banco()
-
-cliente_agua = Cliente_Agua(df_tratado)
-cliente_agua.conectar_banco(banco)
-cliente_agua.inserir_banco()
-
-
-medidor = Medidor_agua(df_tratado)
-medidor.conectar_banco(banco)
-medidor.inserir_banco()
+# caminho_arquivo = r'caminho do arquivo'
+# banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
+# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+# df_tratado = processador.executar_etl()
+#
+# tempo = TempoDimensao(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+#
+# contrato = Contrato_agua(df_tratado)
+# contrato.conectar_banco(banco)
+# contrato.inserir_banco()
+#
+# cliente_agua = Cliente_Agua(df_tratado)
+# cliente_agua.conectar_banco(banco)
+# cliente_agua.inserir_banco()
+#
+#
+# medidor = Medidor_agua(df_tratado)
+# medidor.conectar_banco(banco)
+# medidor.inserir_banco()
