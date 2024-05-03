@@ -7,24 +7,22 @@ from scripts.Conta_agua.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-
+banco = 'mysql+pymysql://b1nary:tecsus@localhost:3306/tecsusDB'
+banco_sem = 'mysql+pymysql://b1nary:tecsus@localhost:3306/'
 def setup_database():
-    # String de conexão com o banco de dados
-    connection_string = 'mysql+pymysql://root:12345@localhost/'
 
-    # Criando um engine para conectar ao MySQL
-    engine = create_engine(connection_string)
+    engine = create_engine(banco_sem)
 
     try:
-        # Conectar ao banco de dados
+
         with engine.connect() as connection:
-            # Dropar o banco de dados se ele existir
+
             connection.execute(text("DROP DATABASE IF EXISTS contas;"))
-            # Criar o banco de dados
+
             connection.execute(text("CREATE DATABASE contas;"))
             connection.execute(text("USE contas;"))
 
-            # Criar as tabelas individualmente
+
             connection.execute(text("""
             CREATE TABLE IF NOT EXISTS dim_tempo (
                 data_id int AUTO_INCREMENT primary key,
@@ -109,7 +107,7 @@ def setup_database():
 
 def processar_dimensoes_agua(csv_file):
     try:
-        banco = 'mysql+pymysql://root:12345@localhost/contas'
+
         processador = ProcessamentoDadosDimensao(csv_file)
         df_tratado = processador.executar_etl()
 
@@ -134,8 +132,6 @@ def processar_dimensoes_agua(csv_file):
 
 def processar_fato_agua(csv_file):
     try:
-
-        banco = 'mysql+pymysql://root:12345@localhost/contas'
 
         processador = ProcessamentoDadosFato(csv_file, banco)
         df_tratado = processador.executar_etl()
