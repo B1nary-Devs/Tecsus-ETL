@@ -1,8 +1,13 @@
 import pandas as pd
 import os
-import glob
-from scripts.Contrato_Agua.index import *
-from scripts.Conta_agua.index import *
+import glo
+from scripts.Contrato_Agua.index import Contrato_agua
+from scripts.Conta_agua.index import Conta_agua
+from scripts.Contrato_Energia.index import Contrato_Energia  
+from scripts.Conta_energia.index import Conta_Energia
+
+
+
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -146,6 +151,43 @@ def processar_fato_agua(csv_file):
 
     except Exception as e:
         print(f'Erro ao processar arquivo de contrato de água {csv_file}: {e}')
+
+
+
+
+# # funcao da ala energia
+
+# def processar_conta_energia(csv_file):  # processar 
+#     try:
+#         conta_energia = Conta_Energia(csv_file)  # objeto 
+#         conta_energia.leitura_conta_energia()  # Leia os dados
+#         conta_energia.transformar_data(['Data Vencimento', 'Data Emissao', 'Leitura Anterior', 'Leitura Atual'])  # Transforme as colunas
+#         conta_energia.transformar_valores(['Valor TUSD', 'Valor FP', 'Consumo PT', 'Consumo FP', 'Consumo TE'])  # Transforme os valores
+#         conta_energia.conectar_banco() 
+#         conta_energia.inserir_banco('conta_energia')  # Insira os dados na tabela conta_energia
+#         conta_energia.gerar_relatorio('Arquivos_inseridos_energia.csv', ['Data Vencimento', 'Data Emissao', 'Leitura Anterior', 'Leitura Atual', 'Consumo PT'])  
+#         print(f'Dados de energia processados e inseridos para: {csv_file}')
+#     except Exception as e:
+#         print(f'Erro ao processar arquivo de energia {csv_file}: {e}')
+
+
+def processar_contrato_energia(csv_file): 
+    try:
+        contrato_energia = Contrato_Energia(csv_file)  
+        contrato_energia.leitura_contrato_energia()  
+        contrato_energia.conectar_banco()  
+        contrato_energia.inserir_banco('contrato_energia')  
+        contrato_energia.gerar_relatorio('Arquivos_inseridos_contrato_energia.csv')  
+        print(f'Dados de contrato de energia processados e inseridos para: {csv_file}')
+    except Exception as e:
+        print(f'Erro ao processar arquivo de contrato de energia {csv_file}: {e}')
+
+
+
+
+
+
+
 
 
 def main(folder_path):
