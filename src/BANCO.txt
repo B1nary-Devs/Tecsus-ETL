@@ -1,16 +1,84 @@
-CREATE TABLE ContaAgua (
-	`ID` INT PRIMARY KEY auto_increment,
-    `ContaDoMes` DATE,
-    `Vencimento` DATE,
-    `Emissao` DATE,
-    `LeituraAnterior` DATE,
-    `LeituraAtual` DATE,
-    `ConsumoDeAguaM3` DECIMAL(10, 3),
-    `ConsumoDeEsgotoM3` DECIMAL(10, 3),
-    `ValorAguaR$` DECIMAL(10, 2),
-    `ValorEsgotoR$` DECIMAL(10, 2),
-    `TotalR$` DECIMAL(10, 2),
-    `NivelDeInformacoesDaFatura` VARCHAR(255),
-    `CodigoDeLigacaoRGI` VARCHAR(255),
-    `Hidrometro` VARCHAR(255)
+drop database contas;
+
+create database contas;
+
+use contas;
+
+-- dimensão tempo
+CREATE TABLE IF NOT EXISTS dim_tempo (
+    data_id int AUTO_INCREMENT primary key,
+    data_full date,
+    dia int,
+    mes int,
+    ano int,
+    trimestre int,
+    semestre int,
+    dia_da_semana varchar(10),
+    mes_nome varchar(15)
+);
+
+-- dimensão contrato
+CREATE TABLE IF NOT EXISTS dim_agua_contrato (
+    numero_contrato int AUTO_INCREMENT primary key,
+    nome_do_contrato varchar(255),
+    fornecedor varchar(255),
+    forma_de_pagamento varchar(50),
+    tipo_de_acesso varchar(50),
+    data_id_vigencia_inicial int,
+    data_id_vigencia_final int,
+    ativado varchar(30),
+    foreign key (data_id_vigencia_inicial) references dim_tempo(data_id),
+	foreign key (data_id_vigencia_final) references dim_tempo(data_id)
+);
+
+-- dimensão cliente
+CREATE TABLE IF NOT EXISTS dim_agua_cliente (
+    numero_cliente int AUTO_INCREMENT primary key,
+    numero_contrato int,
+    nome_cliente varchar(255),
+    cnpj varchar(14),
+    tipo_de_consumidor varchar(50),
+    modelo_de_faturamento varchar(255),
+    foreign key (numero_contrato) references dim_agua_contrato(numero_contrato)
+);
+
+
+-- dimensão medidor
+CREATE TABLE IF NOT EXISTS dim_agua_medidor (
+    numero_medidor int AUTO_INCREMENT primary key,
+    hidrometro varchar(255),
+    codigo_de_ligacao_rgi varchar(50),
+    numero_contrato int,
+	endereco_de_instalacao varchar(255),
+    numero_cliente int,
+    foreign key (numero_cliente) references dim_agua_cliente(numero_cliente),
+    foreign key (numero_contrato) references dim_agua_contrato(numero_contrato)
+);
+
+
+-- fato consumo
+CREATE TABLE IF NOT EXISTS fato_agua_consumo (
+	fato_agua_id int AUTO_INCREMENT primary key,
+	consumo_de_agua_m3 decimal(9,3),
+	consumo_de_esgoto_m3 decimal(9,3),
+	valor_agua float,
+	valor_esgoto float,
+	total_r float,
+	nivel_de_informacoes_da_fatura varchar(21),
+	numero_cliente int,
+	numero_medidor int,
+	numero_contrato int,
+    data_id_conta_do_mes int,
+	data_id_vencimento int,
+	data_id_emissao int,
+	data_id_leitura_anterior int,
+	data_id_leitura_atual int,
+    foreign key (data_id_conta_do_mes) references dim_tempo(data_id),
+	foreign key (data_id_vencimento) references dim_tempo(data_id),
+	foreign key (data_id_emissao) references dim_tempo(data_id),
+	foreign key (data_id_leitura_anterior) references dim_tempo(data_id),
+	foreign key (data_id_leitura_atual) references dim_tempo(data_id),
+	foreign key (numero_cliente) references dim_agua_cliente(numero_cliente),
+	foreign key (numero_medidor) references dim_agua_medidor(numero_medidor),
+	foreign key (numero_contrato) references dim_agua_contrato(numero_contrato)
 );
