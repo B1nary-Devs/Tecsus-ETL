@@ -94,7 +94,7 @@ class Contrato_energia:
             return
 
         columns_expected = ['numero_contrato', 'nome_do_contrato', 'fornecedor', 'classe',
-                            'tipo_de_contrato', 'vigencia_inicial_id', 'vigencia_final_id', 'ativado', 'horario_de_ponta', 'demanda_ponta', 'demanda_fora_ponta',
+                             'data_id_vigencia_inicial_id', 'data_id_vigencia_final_id', 'ativado', 'horario_de_ponta', 'demanda_ponta', 'demanda_fora_ponta',
                             'tensao_contratada'
                             ]
         # Verificar se todas as colunas esperadas estão presentes
@@ -146,18 +146,6 @@ class Medidor_energia:
             print(f"Erro ao inserir dados: {e}")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 class ProcessamentoDadosDimensao:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
@@ -167,7 +155,7 @@ class ProcessamentoDadosDimensao:
     def carregar_dados(self):
         try:
             df = pd.read_csv(caminho_arquivo, encoding='utf-8')
-            print(df.columns)
+            #print(df.columns)
             df = self.preprocessar_dados(df)
             return df
         except Exception as e:
@@ -200,18 +188,25 @@ class ProcessamentoDadosDimensao:
                 'Ativado': 'ativado',
                 'Campo Extra 3': 'cnpj1',
                 'Campo Extra 4': 'cnpj2',
-                'Fornecedor': 'fornecedor'
-
-
-        }
+                'Fornecedor': 'fornecedor'}
         df.rename(columns=colunas_renomeadas, inplace=True)
         print(df.columns)
         df = self.prepara_nome_contrato(df)
         df = self.processar_cnpj(df)
         df = self.processar_numero_instalacao(df)
+        #df = self.transformar_valores(df, ['tensao_contratada'])
         df = self.gerar_identificadores(df)
         df = self.transformar_data(df, ['vigencia_inicial_id', 'vigencia_final_id'])
         df = self.preparar_dimensao_tempo(df, ['vigencia_inicial_id', 'vigencia_final_id'])
+        return df
+
+    def transformar_valores(self, df, colunas):
+        for coluna in colunas:
+            # Primeiro, remove as vírgulas que são usadas como separadores de milhares
+            df[coluna] = df[coluna].replace({',': ''}, regex=True)
+            # Depois, converte a string para float
+            df[coluna] = df[coluna].astype(float)
+
         return df
 
     def preparar_dimensao_tempo(self, df, colunas_data):
@@ -315,9 +310,6 @@ class ProcessamentoDadosDimensao:
         df.dropna(subset=['cnpj'], inplace=True)
 
         return df
-    
-
-
 
 
     def processar_numero_instalacao(self, df):
@@ -354,15 +346,14 @@ class ProcessamentoDadosDimensao:
 
     def executar_etl(self):
         # Salvando os dados tratados para revisão
-        self.salvar_dataframe_csv('dados_tratados_dimensao.csv')
+        self.salvar_dataframe_csv('dados_tratados_dimensao3.csv')
 
         return self.dataframe
     
 
-    
 
 caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
-banco = 'mysql+pymysql://root:1234@localhost/teste' #url de conexao
+banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
 processador = ProcessamentoDadosDimensao(caminho_arquivo)
 df_tratado = processador.executar_etl()
 
@@ -374,6 +365,7 @@ tempo.inserir_banco()
 contrato = Contrato_energia(df_tratado)
 contrato.conectar_banco(banco)
 contrato.inserir_banco()
+
 
 cliente_energia = Cliente_Energia(df_tratado)
 cliente_energia.conectar_banco(banco)

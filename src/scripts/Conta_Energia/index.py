@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class TempoFato:
-    def __init__(self, df, tabela='dim_tempo'):
+    def __init__(self, df, tabela='dim_energia_tempo'):
         self.dataframe = df
         self.engine = None
         self.tabela = tabela
@@ -72,12 +72,11 @@ class FatoEnergia:
                 resultado = connection.execute(query, params).fetchone()
                 if resultado:
                     resultados.append({
-                        'id_fatura': row['id_fatura'],
+                        'fato_energia_id': row['fato_energia_id'],
                         'numero_medidor': resultado[0],
                         'numero_cliente': resultado[1],
                         'numero_contrato': resultado[2],
                         'consumo_em_ponta': row['consumo_em_ponta'],
-                        'consumo_fora_de_ponta': row['consumo_fora_de_ponta'],
                         'consumo_fora_de_ponta_capacidade': row['consumo_fora_de_ponta_capacidade'],
                         'consumo_fora_de_ponta_industrial': row['consumo_fora_de_ponta_industrial'],
                         'demanda_de_ponta_kw': row['demanda_de_ponta_kw'],
@@ -88,12 +87,13 @@ class FatoEnergia:
                         'demanda_ultrapassada_kw': row['demanda_ultrapassada_kw'],
                         'demanda_ultrapassada_kw': row['demanda_ultrapassada_kw'],
                         'demanda_ultrapassada_custo': row['demanda_ultrapassada_custo'],
-                        'total_fatura': row['total_fatura'],
                         'nivel_de_informacoes_da_fatura': row['nivel_de_informacoes_da_fatura'],
-                        'leitura_anterior_id': row['leitura_anterior_id'],
-                        'emissao_id': row['emissao_id'],
-                        'total_da_fatura': row[''total_da_fatura'']
-                    })
+                        'data_id_leitura_anterior': row['data_id_leitura_anterior'],
+                        'data_id_leitura_atual': row['data_id_leitura_atual'],
+                        'data_id_emissao': row['data_id_emissao'],
+                        'data_id_conta_do_mes': row['data_id_conta_do_mes'],
+                        'data_id_vencimento': row['data_id_vencimento'],
+                        'total_da_fatura': row['total_da_fatura']})
         return pd.DataFrame(resultados)
 
     def inserir_banco(self):
@@ -109,23 +109,33 @@ class FatoEnergia:
             print("Nenhum dado válido encontrado para inserção.")
 
 
-import pandas as pd
-
 class ProcessamentoDadosFato:
     def __init__(self, caminho_arquivo, connection_string):
         self.connection_string = connection_string
         self.caminho_arquivo = caminho_arquivo
         self.engine = None
         self.dataframe = self.carregar_dados()
+
+    def conectar_banco(self):
+        try:
+            self.engine = create_engine(self.connection_string)
+            print("Conexão com o banco de dados estabelecida com sucesso.")
+        except Exception as e:
+            print(f"Falha ao conectar ao banco de dados: {e}")
+
         
     def carregar_dados(self):
         try:
             df = pd.read_csv(self.caminho_arquivo, dtype=str)
+            colunas_lista = df.columns.tolist()
+            print(colunas_lista)
             df = self.preprocessar_dados(df)
             return df
         except Exception as e:
             print(f"Erro ao carregar dados: {e}")
             return pd.DataFrame()
+
+
 
     def preprocessar_dados(self, df):
         colunas_renomeadas = {
@@ -138,28 +148,50 @@ class ProcessamentoDadosFato:
             'Demanda FP IND (kW)': 'demanda_fora_de_ponta_industrial',
             'Demanda FP CAP (kW)': 'demanda_fora_de_ponta_capacidade',
             'Demanda PT (kW)': 'demanda_de_ponta_kw',
-            'Demanda PT (kW)': 'demanda_de_ponta_kw',
             'Consumo FP IND VD': 'consumo_fora_de_ponta_industrial',
             'Consumo FP CAP VD': 'consumo_fora_de_ponta_capacidade',
-            'Nivel de Informacoes da Fatura':'nivel_de_informacoes_da_fatura', 
-            'Emissao': 'emissao_id',
-            'Leitura Anterior': 'leitura_anterior_id',
-            'Leitura Atual': 'leitura_atual_id',
+            'Nível de Informações da Fatura': 'nivel_de_informacoes_da_fatura', 
+            'Conta do Mês': 'conta_do_mes',
+            'Emissão': 'emissao',
+            'Leitura Anterior': 'leitura_anterior',
+            'Leitura Atual': 'leitura_atual',
+            'Data de Vencimento': 'vencimento',
             'Número Instalação': 'numero_da_instalacao',
             'Total': 'total_da_fatura'
         }
         df.rename(columns=colunas_renomeadas, inplace=True)
         df = self.processar_numero_da_instalacao(df)
+        df = self.gerar_identificadores(df)
+        df = self.transformar_valores(df, [
+            'demanda_de_ponta_kw', 'consumo_fora_de_ponta_capacidade', 'consumo_fora_de_ponta_industrial', 'demanda_fora_de_ponta_capacidade',
+            'demanda_fora_de_ponta_industrial', 'demanda_faturada_custo', 'demanda_faturada_pt_custo',
+            'demanda_faturada_fp_custo', 'demanda_ultrapassada_kw', 'demanda_ultrapassada_custo', 'total_da_fatura'
+        ])
+
+
+        df = self.transformar_data(df, ['leitura_anterior', 'leitura_atual', 
+                                               'emissao', 'conta_do_mes', 'vencimento'])
+        df = self.preparar_dimensao_tempo(df, ['leitura_anterior', 'leitura_atual', 
+                                               'emissao', 'conta_do_mes', 'vencimento'])
         # Adicionado processamento adicional aqui se necessário
+        
         return df
+
+    def transformar_valores(self, df, colunas):
+        for coluna in colunas:
+            # Primeiro, remove as vírgulas que são usadas como separadores de milhares
+            df[coluna] = df[coluna].replace({',': ''}, regex=True)
+            # Depois, converte a string para float
+            df[coluna] = df[coluna].astype(float)
+
+        return df
+
     
     def processar_numero_da_instalacao(self, df):
         # Removendo linhas com valores nulos ou strings vazias
         df = df.dropna(subset=['numero_da_instalacao'])
         df = df[(df['numero_da_instalacao'].str.strip() != '')]
         return df
-
-
 
     def obter_ultimo_id_data(self):
         try:
@@ -169,12 +201,30 @@ class ProcessamentoDadosFato:
                 return 0
 
             with self.engine.connect() as connection:
-                result = connection.execute(text("SELECT MAX(data_id) FROM dim_tempo"))
+                result = connection.execute(text("SELECT MAX(data_id) FROM dim_energia_tempo"))
                 ultimo_id = result.fetchone()[0]
                 return ultimo_id if ultimo_id is not None else 0
         except Exception as e:
-            print(f"Erro ao obter o último ID da tabela dim_tempo: {e}")
+            print(f"Erro ao obter o último ID da tabela dim_energia_tempo: {e}")
             return 0
+
+    def transformar_data(self, df, colunas):
+        for coluna in colunas:
+            # Substitui 'Invalid date' por pd.NaT
+            df[coluna] = df[coluna].replace('Invalid date', pd.NaT)
+
+            # Converte strings para datetime, assume o primeiro número como dia se ele for menor ou igual a 12
+            df[coluna] = pd.to_datetime(
+                df[coluna],
+                dayfirst=True,
+                errors='coerce'  # Converte entradas inválidas em NaT
+            )
+
+            # Agora, formata as datas válidas para o formato 'yyyy-mm-dd'
+            # e deixa como None (ou pd.NaT) as entradas que não puderam ser convertidas
+            df[coluna] = df[coluna].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else None)
+
+        return df
 
     def preparar_dimensao_tempo(self, df, colunas_data):
         id_data = self.obter_ultimo_id_data() + 1
@@ -220,19 +270,10 @@ class ProcessamentoDadosFato:
         fato_energia_id = 1
 
         # Gerar IDs para contratos
-        if 'total_r' in df.columns:
+        if 'total_da_fatura' in df.columns:
             df['fato_energia_id'] = range(fato_energia_id, fato_energia_id + len(df))
             fato_energia_id += len(df)  # Atualiza o id_contrato para continuar a partir do último usado
 
-
-        return df
-
-    def transformar_valores(self, df, colunas):
-        for coluna in colunas:
-            # Primeiro, remove as vírgulas que são usadas como separadores de milhares
-            df[coluna] = df[coluna].replace({',': ''}, regex=True)
-            # Depois, converte a string para float
-            df[coluna] = df[coluna].astype(float)
 
         return df
 
@@ -262,24 +303,23 @@ class ProcessamentoDadosFato:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_fato10.csv')
+        self.salvar_dataframe_csv('dados_tratados_fato9.csv')
         return self.dataframe
 
 
 
-caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\dados_tratados_fato10.csv'
-banco = 'mysql+pymysql://root:1234@localhost/teste' # url de conexao
+caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\pro_energia.csv'
+banco = 'mysql+pymysql://root:1234@localhost/sonar' # url de conexao
 
 processador = ProcessamentoDadosFato(caminho_arquivo, banco)
 df_tratado = processador.executar_etl()
 
 
+tempo = TempoFato(df_tratado)
+tempo.conectar_banco(banco)
+tempo.inserir_banco()
+
 
 energia = FatoEnergia(df_tratado)
 energia.conectar_banco(banco)
 energia.inserir_banco()
-
-
-tempo = TempoFato(df_tratado)
-tempo.conectar_banco(banco)
-tempo.inserir_banco()
