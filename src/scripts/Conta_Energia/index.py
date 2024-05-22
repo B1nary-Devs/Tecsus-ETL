@@ -4,7 +4,7 @@ import pandas as pd
 
 
 
-class TempoFato:
+class TempoFatoEnergia:
     def __init__(self, df, tabela='dim_energia_tempo'):
         self.dataframe = df
         self.engine = None
@@ -109,7 +109,7 @@ class FatoEnergia:
             print("Nenhum dado válido encontrado para inserção.")
 
 
-class ProcessamentoDadosFato:
+class ProcessamentoDadosFatoEnergia:
     def __init__(self, caminho_arquivo, connection_string):
         self.connection_string = connection_string
         self.caminho_arquivo = caminho_arquivo
@@ -128,7 +128,6 @@ class ProcessamentoDadosFato:
         try:
             df = pd.read_csv(self.caminho_arquivo, dtype=str)
             colunas_lista = df.columns.tolist()
-            print(colunas_lista)
             df = self.preprocessar_dados(df)
             return df
         except Exception as e:
@@ -298,7 +297,6 @@ class ProcessamentoDadosFato:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 
@@ -308,18 +306,18 @@ class ProcessamentoDadosFato:
 
 
 
-caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\pro_energia.csv'
-banco = 'mysql+pymysql://root:1234@localhost/sonar' # url de conexao
-
-processador = ProcessamentoDadosFato(caminho_arquivo, banco)
-df_tratado = processador.executar_etl()
-
-
-tempo = TempoFato(df_tratado)
-tempo.conectar_banco(banco)
-tempo.inserir_banco()
-
-
-energia = FatoEnergia(df_tratado)
-energia.conectar_banco(banco)
-energia.inserir_banco()
+# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\pro_energia.csv'
+# banco = 'mysql+pymysql://root:1234@localhost/sonar' # url de conexao
+#
+# processador = ProcessamentoDadosFato(caminho_arquivo, banco)
+# df_tratado = processador.executar_etl()
+#
+#
+# tempo = TempoFato(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+#
+# energia = FatoEnergia(df_tratado)
+# energia.conectar_banco(banco)
+# energia.inserir_banco()

@@ -36,7 +36,7 @@ class Cliente_Agua:
             print(f"Erro ao inserir dados: {e}")
 
 
-class TempoDimensao:
+class TempoDimensaoAgua:
     def __init__(self, df, tabela='dim_tempo'):
         self.dataframe = df
         self.engine = None
@@ -143,7 +143,7 @@ class Medidor_agua:
             print(f"Erro ao inserir dados: {e}")
 
 
-class ProcessamentoDadosDimensao:
+class ProcessamentoDadosDimensaoAgua:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
         self.dataframe = self.carregar_dados()
@@ -314,7 +314,6 @@ class ProcessamentoDadosDimensao:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 

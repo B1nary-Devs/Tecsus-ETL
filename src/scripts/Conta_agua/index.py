@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, text
 import pandas as pd
 
-class TempoFato:
+class TempoFatoAgua:
     def __init__(self, df, tabela='dim_tempo'):
         self.dataframe = df
         self.engine = None
@@ -94,7 +94,7 @@ class FatoAgua:
             print("Nenhum dado válido encontrado para inserção.")
 
 
-class ProcessamentoDadosFato:
+class ProcessamentoDadosFatoAgua:
     def __init__(self, caminho_arquivo, connection_string):
         self.connection_string = connection_string
         self.caminho_arquivo = caminho_arquivo
@@ -250,7 +250,6 @@ class ProcessamentoDadosFato:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 
