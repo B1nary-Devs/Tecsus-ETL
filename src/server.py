@@ -2,8 +2,18 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import os
 from main import main
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite todas as origens
+    allow_credentials=True,
+    allow_methods=["*"],  # Permite todos os métodos
+    allow_headers=["*"],  # Permite todos os cabeçalhos
+)
 
 @app.get("/")
 async def read_item():
