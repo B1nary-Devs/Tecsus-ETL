@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, text
 import pandas as pd
 
-class TempoFato:
+class TempoFatoAgua:
     def __init__(self, df, tabela='dim_tempo'):
         self.dataframe = df
         self.engine = None
@@ -32,7 +32,6 @@ class TempoFato:
 
         try:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -89,12 +88,11 @@ class FatoAgua:
         df_preparado = self.buscar_chaves()
         if not df_preparado.empty:
             df_preparado.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print("Dados inseridos com sucesso na tabela " + self.tabela + ".")
         else:
             print("Nenhum dado válido encontrado para inserção.")
 
 
-class ProcessamentoDadosFato:
+class ProcessamentoDadosFatoAgua:
     def __init__(self, caminho_arquivo, connection_string):
         self.connection_string = connection_string
         self.caminho_arquivo = caminho_arquivo
@@ -250,12 +248,11 @@ class ProcessamentoDadosFato:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_fato10.csv')
+        self.salvar_dataframe_csv('dados_tratados_agua_fato.csv')
         return self.dataframe
 
 

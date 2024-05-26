@@ -32,12 +32,12 @@ class Cliente_Energia:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
 
-class TempoDimensao:
+class TempoDimensaoEnergia:
+class TempoDimensaoEnergia:
     def __init__(self, df, tabela='dim_energia_tempo'):
         self.dataframe = df
         self.engine = None
@@ -70,7 +70,6 @@ class TempoDimensao:
 
         try:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -107,7 +106,6 @@ class Contrato_energia:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -141,12 +139,12 @@ class Medidor_energia:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
 
-class ProcessamentoDadosDimensao:
+class ProcessamentoDadosDimensaoEnergia:
+class ProcessamentoDadosDimensaoEnergia:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
         self.dataframe = self.carregar_dados()
@@ -154,8 +152,8 @@ class ProcessamentoDadosDimensao:
 
     def carregar_dados(self):
         try:
-            df = pd.read_csv(caminho_arquivo, encoding='utf-8')
-            #print(df.columns)
+            df = pd.read_csv(self.caminho_arquivo, encoding='utf-8')
+            df = pd.read_csv(self.caminho_arquivo, encoding='utf-8')
             df = self.preprocessar_dados(df)
             return df
         except Exception as e:
@@ -164,37 +162,37 @@ class ProcessamentoDadosDimensao:
 
     def preprocessar_dados(self, df):
         colunas_renomeadas = {
-                'Horário de Ponta': 'horario_de_ponta',
-                'Planta': 'planta',
-                'Classe': 'classe',
-                'Nome do Contrato': 'nome_do_contrato',
-                'Código de Identificação': 'codigo_de_identificacao',
-                'Código Fiscal de Operação': 'codigo_fiscal_de_operacao',
-                'Roteiro de Leitura': 'roteiro_de_leitura',
-                'Tipo de Consumidor (Energia)': 'tipo_de_consumidor',
-                'Número Instalação': 'numero_da_instalacao',
-                'Número Medidor': 'numero_medidor',
-                'Número Cliente': 'numero_cliente',
-                'Modalidade': 'modalidade',
-                'Demanda Ponta': 'demanda_ponta',
-                'Demanda Fora Ponta': 'demanda_fora_ponta',
-                'Tensão Contratada (V)': 'tensao_contratada',
-                'Número Contrato': 'numero_contrato',
-                'Inscrição Cadastral do Imóvel': 'inscricao_cadastral_do_imovel',
-                'Código de Consumidor': 'codigo_de_consumidor',
-                'Endereço de Instalação': 'endereco_de_instalacao',
-                'Vigência Inicial': 'vigencia_inicial_id',
-                'Vigência Final': 'vigencia_final_id',
-                'Ativado': 'ativado',
-                'Campo Extra 3': 'cnpj1',
-                'Campo Extra 4': 'cnpj2',
-                'Fornecedor': 'fornecedor'}
+            'Horário de Ponta': 'horario_de_ponta',
+            'Planta': 'planta',
+            'Classe': 'classe',
+            'Nome do Contrato': 'nome_do_contrato',
+            'Código de Identificação': 'codigo_de_identificacao',
+            'Código Fiscal de Operação': 'codigo_fiscal_de_operacao',
+            'Roteiro de Leitura': 'roteiro_de_leitura',
+            'Tipo de Consumidor (Energia)': 'tipo_de_consumidor',
+            'Número Instalação': 'numero_da_instalacao',
+            'Número Medidor': 'numero_medidor',
+            'Número Cliente': 'numero_cliente',
+            'Modalidade': 'modalidade',
+            'Demanda Ponta': 'demanda_ponta',
+            'Demanda Fora Ponta': 'demanda_fora_ponta',
+            'Tensão Contratada (V)': 'tensao_contratada',
+            'Número Contrato': 'numero_contrato',
+            'Inscrição Cadastral do Imóvel': 'inscricao_cadastral_do_imovel',
+            'Código de Consumidor': 'codigo_de_consumidor',
+            'Endereço de Instalação': 'endereco_de_instalacao',
+            'Vigência Inicial': 'vigencia_inicial_id',
+            'Vigência Final': 'vigencia_final_id',
+            'Ativado': 'ativado',
+            'Campo Extra 3': 'cnpj1',
+            'Campo Extra 4': 'cnpj2',
+            'Fornecedor': 'fornecedor'}
         df.rename(columns=colunas_renomeadas, inplace=True)
-        print(df.columns)
+
         df = self.prepara_nome_contrato(df)
         df = self.processar_cnpj(df)
         df = self.processar_numero_instalacao(df)
-        #df = self.transformar_valores(df, ['tensao_contratada'])
+        # df = self.transformar_valores(df, ['tensao_contratada'])
         df = self.gerar_identificadores(df)
         df = self.transformar_data(df, ['vigencia_inicial_id', 'vigencia_final_id'])
         df = self.preparar_dimensao_tempo(df, ['vigencia_inicial_id', 'vigencia_final_id'])
@@ -257,7 +255,6 @@ class ProcessamentoDadosDimensao:
 
         return df
 
-
     def gerar_identificadores(self, df):
         # Inicializa os contadores para os IDs
         id_contrato = 1
@@ -280,7 +277,6 @@ class ProcessamentoDadosDimensao:
             id_medidor += len(df)  # Atualiza o id_medidor para continuar a partir do último usado
 
         return df
-    
 
     def processar_cnpj(self, df):
         # Aplica conversão numérica somente se o valor contém 'E+'
@@ -311,7 +307,6 @@ class ProcessamentoDadosDimensao:
 
         return df
 
-
     def processar_numero_instalacao(self, df):
         # Removendo linhas com valores nulos ou strings vazias
         df = df.dropna(subset=['numero_da_instalacao'])
@@ -340,38 +335,60 @@ class ProcessamentoDadosDimensao:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
         # Salvando os dados tratados para revisão
-        self.salvar_dataframe_csv('dados_tratados_dimensao3.csv')
+        self.salvar_dataframe_csv('dados_tratados_dimensao_energia.csv')
 
         return self.dataframe
     
 
 
-caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
-banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
-processador = ProcessamentoDadosDimensao(caminho_arquivo)
-df_tratado = processador.executar_etl()
-
-tempo = TempoDimensao(df_tratado)
-tempo.conectar_banco(banco)
-tempo.inserir_banco()
-
-
-contrato = Contrato_energia(df_tratado)
-contrato.conectar_banco(banco)
-contrato.inserir_banco()
-
-
-cliente_energia = Cliente_Energia(df_tratado)
-cliente_energia.conectar_banco(banco)
-cliente_energia.inserir_banco()
-
-
-medidor = Medidor_energia(df_tratado)
-medidor.conectar_banco(banco)
-medidor.inserir_banco()
+# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
+# banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
+# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+# df_tratado = processador.executar_etl()
+#
+# tempo = TempoDimensao(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+#
+# contrato = Contrato_energia(df_tratado)
+# contrato.conectar_banco(banco)
+# contrato.inserir_banco()
+#
+#
+# cliente_energia = Cliente_Energia(df_tratado)
+# cliente_energia.conectar_banco(banco)
+# cliente_energia.inserir_banco()
+#
+#
+# medidor = Medidor_energia(df_tratado)
+# medidor.conectar_banco(banco)
+# medidor.inserir_banco()
+# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
+# banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
+# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+# df_tratado = processador.executar_etl()
+#
+# tempo = TempoDimensao(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+#
+# contrato = Contrato_energia(df_tratado)
+# contrato.conectar_banco(banco)
+# contrato.inserir_banco()
+#
+#
+# cliente_energia = Cliente_Energia(df_tratado)
+# cliente_energia.conectar_banco(banco)
+# cliente_energia.inserir_banco()
+#
+#
+# medidor = Medidor_energia(df_tratado)
+# medidor.conectar_banco(banco)
+# medidor.inserir_banco()
