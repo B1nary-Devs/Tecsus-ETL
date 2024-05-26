@@ -35,7 +35,6 @@ class TempoFatoEnergia:
 
         try:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -301,7 +300,7 @@ class ProcessamentoDadosFatoEnergia:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_fato9.csv')
+        self.salvar_dataframe_csv('dados_tratados_energia_fato.csv')
         return self.dataframe
 
 

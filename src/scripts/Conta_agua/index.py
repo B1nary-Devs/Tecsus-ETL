@@ -32,7 +32,6 @@ class TempoFatoAgua:
 
         try:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -89,7 +88,6 @@ class FatoAgua:
         df_preparado = self.buscar_chaves()
         if not df_preparado.empty:
             df_preparado.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print("Dados inseridos com sucesso na tabela " + self.tabela + ".")
         else:
             print("Nenhum dado válido encontrado para inserção.")
 
@@ -254,7 +252,7 @@ class ProcessamentoDadosFatoAgua:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_fato10.csv')
+        self.salvar_dataframe_csv('dados_tratados_agua_fato.csv')
         return self.dataframe
 
 

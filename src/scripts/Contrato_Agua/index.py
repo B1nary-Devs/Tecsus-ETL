@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 import numpy as np
 
+
 class Cliente_Agua:
     def __init__(self, df, tabela='dim_agua_cliente'):
         self.dataframe = df
@@ -31,7 +32,6 @@ class Cliente_Agua:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -69,7 +69,6 @@ class TempoDimensaoAgua:
 
         try:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -104,7 +103,6 @@ class Contrato_agua:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -138,7 +136,6 @@ class Medidor_agua:
 
         try:
             df_filtered.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
-            print(f"Dados inseridos com sucesso na tabela {self.tabela}.")
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
 
@@ -319,17 +316,18 @@ class ProcessamentoDadosDimensaoAgua:
 
     def executar_etl(self):
         # Salvando os dados tratados para revisão
-        self.salvar_dataframe_csv('dados_tratados_dimensao.csv')
+        self.salvar_dataframe_csv('dados_tratados_dimensao_agua.csv')
 
         return self.dataframe
 
 
-# caminho_arquivo = r'caminho do arquivo'
-# banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
-# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+# caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\con_agua.csv'
+# # banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
+# banco = 'mysql+pymysql://root:12345@localhost:3306/tecsusbd'
+# processador = ProcessamentoDadosDimensaoAgua(caminho_arquivo)
 # df_tratado = processador.executar_etl()
 #
-# tempo = TempoDimensao(df_tratado)
+# tempo = TempoDimensaoAgua(df_tratado)
 # tempo.conectar_banco(banco)
 # tempo.inserir_banco()
 #
