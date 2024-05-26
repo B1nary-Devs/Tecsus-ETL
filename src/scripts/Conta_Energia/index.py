@@ -296,7 +296,6 @@ class ProcessamentoDadosFatoEnergia:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 

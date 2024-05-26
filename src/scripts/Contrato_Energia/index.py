@@ -37,6 +37,7 @@ class Cliente_Energia:
 
 
 class TempoDimensaoEnergia:
+class TempoDimensaoEnergia:
     def __init__(self, df, tabela='dim_energia_tempo'):
         self.dataframe = df
         self.engine = None
@@ -143,6 +144,7 @@ class Medidor_energia:
 
 
 class ProcessamentoDadosDimensaoEnergia:
+class ProcessamentoDadosDimensaoEnergia:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
         self.dataframe = self.carregar_dados()
@@ -150,6 +152,7 @@ class ProcessamentoDadosDimensaoEnergia:
 
     def carregar_dados(self):
         try:
+            df = pd.read_csv(self.caminho_arquivo, encoding='utf-8')
             df = pd.read_csv(self.caminho_arquivo, encoding='utf-8')
             df = self.preprocessar_dados(df)
             return df
@@ -185,6 +188,7 @@ class ProcessamentoDadosDimensaoEnergia:
             'Campo Extra 4': 'cnpj2',
             'Fornecedor': 'fornecedor'}
         df.rename(columns=colunas_renomeadas, inplace=True)
+
         df = self.prepara_nome_contrato(df)
         df = self.processar_cnpj(df)
         df = self.processar_numero_instalacao(df)
@@ -331,7 +335,6 @@ class ProcessamentoDadosDimensaoEnergia:
     def salvar_dataframe_csv(self, caminho_saida):
         try:
             self.dataframe.to_csv(caminho_saida, index=False)
-            print(f"DataFrame salvo com sucesso em {caminho_saida}.")
         except Exception as e:
             print(f"Erro ao salvar o DataFrame: {e}")
 
@@ -343,6 +346,29 @@ class ProcessamentoDadosDimensaoEnergia:
     
 
 
+# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
+# banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
+# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+# df_tratado = processador.executar_etl()
+#
+# tempo = TempoDimensao(df_tratado)
+# tempo.conectar_banco(banco)
+# tempo.inserir_banco()
+#
+#
+# contrato = Contrato_energia(df_tratado)
+# contrato.conectar_banco(banco)
+# contrato.inserir_banco()
+#
+#
+# cliente_energia = Cliente_Energia(df_tratado)
+# cliente_energia.conectar_banco(banco)
+# cliente_energia.inserir_banco()
+#
+#
+# medidor = Medidor_energia(df_tratado)
+# medidor.conectar_banco(banco)
+# medidor.inserir_banco()
 # caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
 # banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
 # processador = ProcessamentoDadosDimensao(caminho_arquivo)
