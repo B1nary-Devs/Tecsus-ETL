@@ -252,17 +252,18 @@ class ProcessamentoDadosFatoAgua:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_agua_fato.csv')
+        # self.salvar_dataframe_csv('dados_tratados_agua_fato.csv')
         return self.dataframe
 
 
-# caminho_arquivo = r'caminho do arquivo'
-# banco = 'mysql+pymysql://root:12345@localhost/contas' # url de conexao
 #
-# processador = ProcessamentoDadosFato(caminho_arquivo, banco)
+# caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\pro_agua.csv'
+# banco = 'mysql+pymysql://root:12345@localhost/tecsusbd' # url de conexao
+#
+# processador = ProcessamentoDadosFatoAgua(caminho_arquivo, banco)
 # df_tratado = processador.executar_etl()
 #
-# tempo = TempoFato(df_tratado)
+# tempo = TempoFatoAgua(df_tratado)
 # tempo.conectar_banco(banco)
 # tempo.inserir_banco()
 #

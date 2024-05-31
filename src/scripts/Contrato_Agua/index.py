@@ -316,11 +316,11 @@ class ProcessamentoDadosDimensaoAgua:
 
     def executar_etl(self):
         # Salvando os dados tratados para revisão
-        self.salvar_dataframe_csv('dados_tratados_dimensao_agua.csv')
+        # self.salvar_dataframe_csv('dados_tratados_dimensao_agua.csv')
 
         return self.dataframe
 
-
+#
 # caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\con_agua.csv'
 # # banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
 # banco = 'mysql+pymysql://root:12345@localhost:3306/tecsusbd'

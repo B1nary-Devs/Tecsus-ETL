@@ -36,7 +36,7 @@ class Cliente_Energia:
             print(f"Erro ao inserir dados: {e}")
 
 
-class TempoDimensaoEnergia:
+
 class TempoDimensaoEnergia:
     def __init__(self, df, tabela='dim_energia_tempo'):
         self.dataframe = df
@@ -143,7 +143,6 @@ class Medidor_energia:
             print(f"Erro ao inserir dados: {e}")
 
 
-class ProcessamentoDadosDimensaoEnergia:
 class ProcessamentoDadosDimensaoEnergia:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
@@ -340,41 +339,19 @@ class ProcessamentoDadosDimensaoEnergia:
 
     def executar_etl(self):
         # Salvando os dados tratados para revisão
-        self.salvar_dataframe_csv('dados_tratados_dimensao_energia.csv')
+        # self.salvar_dataframe_csv('dados_tratados_dimensao_energia.csv')
 
         return self.dataframe
     
 
-
-# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
-# banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
-# processador = ProcessamentoDadosDimensao(caminho_arquivo)
+#
+# caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\con_energia.csv'
+# # banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
+# banco = 'mysql+pymysql://root:12345@localhost:3306/tecsusbd'
+# processador = ProcessamentoDadosDimensaoEnergia(caminho_arquivo)
 # df_tratado = processador.executar_etl()
 #
-# tempo = TempoDimensao(df_tratado)
-# tempo.conectar_banco(banco)
-# tempo.inserir_banco()
-#
-#
-# contrato = Contrato_energia(df_tratado)
-# contrato.conectar_banco(banco)
-# contrato.inserir_banco()
-#
-#
-# cliente_energia = Cliente_Energia(df_tratado)
-# cliente_energia.conectar_banco(banco)
-# cliente_energia.inserir_banco()
-#
-#
-# medidor = Medidor_energia(df_tratado)
-# medidor.conectar_banco(banco)
-# medidor.inserir_banco()
-# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\con_energia.csv'
-# banco = 'mysql+pymysql://root:1234@localhost/sonar' #url de conexao
-# processador = ProcessamentoDadosDimensao(caminho_arquivo)
-# df_tratado = processador.executar_etl()
-#
-# tempo = TempoDimensao(df_tratado)
+# tempo = TempoDimensaoEnergia(df_tratado)
 # tempo.conectar_banco(banco)
 # tempo.inserir_banco()
 #
