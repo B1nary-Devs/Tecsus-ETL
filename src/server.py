@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import os
-from main import main
+from src.main import main
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
