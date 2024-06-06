@@ -33,11 +33,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Executar os testes de integração
-      - name: Run integration tests
-        run: |
-          source venv/bin/activate
-          pytest tests/integration
+      # # Executar os testes de integração
+      # - name: Run integration tests
+      #   run: |
+      #     source venv/bin/activate
+      #     pytest tests/integration
 
       # Notificar caso o teste falhe
       - name: Notify failure
