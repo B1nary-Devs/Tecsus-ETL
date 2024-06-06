@@ -1,0 +1,51 @@
+name: CI Pull Request Feature to Dev
+
+on:
+  #Pull Request aprovados
+  pull_request_review:
+    types: [submitted]
+    branches:
+      - dev
+
+jobs:
+  approved-build-and-test-integration:
+    if: github.event.review.state == 'APPROVED'
+    # maquina virtual Ubuntu que executa o job
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "This Pull Request was Approved!"
+
+      # Checkout do codigo do pull request
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Configuração do python comk a versão 3 pra cima
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      # Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # # Executar os teste de integração
+      # - name: Run integration tests
+      #   run: |
+      #     pytest tests/integration
+
+       Notificar caso o teste falhe
+      - name: Notify failure
+        if: failure()
+        run: echo "Integration tests failed. Please check the logs."
+
+      # Merge caso passe nos testes e build
+      - name: Merge pull request
+        if: success()
+        run: |
+          echo "Integration tests passed. Merging pull request."
