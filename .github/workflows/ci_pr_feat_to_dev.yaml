@@ -48,3 +48,24 @@ jobs:
       - name: Merge pull request
         if: success()
         run: echo "Integration tests passed. Merging pull request."
+
+        # Instalar GitHub CLI
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      # Autenticar GitHub CLI
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $GITHUB_TOKEN | gh auth login --with-token
+
+      # Merge e fechar o pull request se os testes e build passarem
+      - name: Merge pull request
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --state open --json number --jq '.[0].number')
+          gh pr merge $PR_NUMBER --merge --delete-branch --repo ${{ github.repository }}
+          echo "Pull request #$PR_NUMBER has been merged and closed."
