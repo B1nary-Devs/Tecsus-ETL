@@ -1,7 +1,7 @@
 name: CI Pull Request Feature to Dev
 
 on:
-  #Pull Request aprovados
+  # Aciona a pipeline em pull requests aprovados para a branch dev
   pull_request_review:
     types: [submitted]
     branches:
@@ -9,24 +9,23 @@ on:
 
 jobs:
   approved-build-and-test-integration:
-    if: github.event.review.state == 'APPROVED'
-    # maquina virtual Ubuntu que executa o job
-    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest # Máquina virtual Ubuntu que executa o job
 
     steps:
       - run: echo "This Pull Request was Approved!"
 
-      # Checkout do codigo do pull request
+      # Checkout do código do pull request
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Configuração do python comk a versão 3 pra cima
+      # Configuração do Python com a versão 3 ou superior
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: "3.x"
 
-      # Instalar dependencias
+      # Instalar dependências
       - name: Install dependencies
         run: |
           python -m venv venv
@@ -34,12 +33,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # # Executar os teste de integração
-      # - name: Run integration tests
-      #   run: |
-      #     pytest tests/integration
+      # Executar os testes de integração
+      - name: Run integration tests
+        run: |
+          source venv/bin/activate
+          pytest tests/integration
 
-       Notificar caso o teste falhe
+      # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
         run: echo "Integration tests failed. Please check the logs."
@@ -47,5 +47,4 @@ jobs:
       # Merge caso passe nos testes e build
       - name: Merge pull request
         if: success()
-        run: |
-          echo "Integration tests passed. Merging pull request."
+        run: echo "Integration tests passed. Merging pull request."
