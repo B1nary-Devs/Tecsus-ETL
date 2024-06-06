@@ -1,0 +1,40 @@
+name: CI Feature Branch
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the code from the branch
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Configuração do python
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      # Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # # Executar os teste unitarios
+      # - name: Run unit tests
+      #   run: |
+      #     source venv/bin/activate
+      #     python -m unittest discover -s tests -p "test_*.py"
+
+      # Notificar caso o teste falhe
+      - name: Notify failure
+        if: failure()
+        run: echo "Unit tests failed. Please check the logs."
