@@ -1,0 +1,62 @@
+name: CI Pull Request Feature to Dev
+
+on:
+  # Aciona a pipeline em pull requests aprovados para a branch dev
+  pull_request_review:
+    types: [submitted]
+    branches:
+      - dev
+
+jobs:
+  approved-build-and-test-integration:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest # Máquina virtual Ubuntu que executa o job
+
+    steps:
+      - run: echo "This Pull Request was Approved!"
+
+      # Checkout do código do pull request
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Configuração do Python com a versão 3 ou superior
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      # Instalar dependências
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # # Executar os testes de integração
+      # - name: Run integration tests
+      #   run: |
+      #     source venv/bin/activate
+      #     pytest tests/integration
+
+      # Notificar caso o teste falhe
+      - name: Notify failure
+        if: failure()
+        run: echo "Integration tests failed. Please check the logs."
+
+  automerge:
+    name: Merge Pull Request
+    runs-on: [ubuntu-latest]
+    needs: [approved-build-and-test-integration]
+    if: github.base.ref == 'dev'
+    steps:
+      - name: Merge
+        uses: actions/github-script@0.2.0
+        with:
+          scripts: |
+            github.pullRequests.merge ({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              pull_number: context.payload.pull_request.number
+            })
+          github-token: $({github.token})
