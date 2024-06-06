@@ -43,10 +43,10 @@ jobs:
         if: failure()
         run: echo "Integration tests failed. Please check the logs."
 
-      - id: automerge
-        name: automerge
-        uses: "pascalgn/automerge-action@v0.16.3"
-        permissions:
-          contents: write
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # - id: automerge
+      #   name: automerge
+      #   uses: "pascalgn/automerge-action@v0.16.3"
+      #   permissions:
+      #     contents: write
+      #   env:
+      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
