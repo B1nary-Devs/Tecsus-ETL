@@ -38,16 +38,10 @@ jobs:
       #   run: |
       #     source venv/bin/activate
       #     pytest tests/integration
-
       # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
         run: echo "Integration tests failed. Please check the logs."
-
-      # Merge caso passe nos testes e build
-      - name: Merge pull request
-        if: success()
-        run: echo "Integration tests passed. Merging pull request."
 
         # Instalar GitHub CLI
       - name: Install GitHub CLI
@@ -69,3 +63,8 @@ jobs:
           PR_NUMBER=$(gh pr list --state open --json number --jq '.[0].number')
           gh pr merge $PR_NUMBER --merge --delete-branch --repo ${{ github.repository }}
           echo "Pull request #$PR_NUMBER has been merged and closed."
+
+      # Merge caso passe nos testes e build
+      - name: Merge pull request
+        if: success()
+        run: echo "Integration tests passed. Merging pull request."
