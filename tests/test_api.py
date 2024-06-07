@@ -26,7 +26,7 @@ class TestUploadFile(unittest.TestCase):
         mock_main.assert_called_once_with('../data/raw')
 
     @patch("builtins.open", side_effect=Exception("Test error"))
-    def test_upload_file_failure(self):
+    def test_upload_file_failure(self, mock_open):
         # Simula um arquivo para upload
         file_content = b"file content"
         file_name = "testfile.txt"
