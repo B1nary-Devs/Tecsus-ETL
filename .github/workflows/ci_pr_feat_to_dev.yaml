@@ -36,7 +36,7 @@ jobs:
 
       # Executar os testes de integração
       - name: Run integration tests
-        if: github.base_ref == 'dev'
+        if: github.base_ref != 'dev' && github.base_ref != 'main'
         run: |
           source venv/bin/activate
           python -m unittest discover -s tests
@@ -49,7 +49,8 @@ jobs:
       - name: Merge pull request
         if: success()
         run: echo "Merging pull request."
-
+        
+ #função que executa o merge do pull request apos approved-pull-request tiver exito
   automerge:
     name: Merge Pull Request
     runs-on: [ubuntu-latest]
