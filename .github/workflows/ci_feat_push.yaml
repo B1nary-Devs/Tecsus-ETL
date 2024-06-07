@@ -29,12 +29,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # # Executar os teste unitarios
-      # - name: Run unit tests
-      #   run: |
-      #     source venv/bin/activate
-      #     python -m unittest discover -s tests -p "test_*.py"
-
       # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
