@@ -37,7 +37,7 @@ jobs:
       - name: Run integration tests
         run: |
           source venv/bin/activate
-          pytest -m unittest discover -s tests
+          python -m unittest discover -s tests
 
       # Notificar caso o teste falhe
       - name: Notify failure
