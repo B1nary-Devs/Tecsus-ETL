@@ -300,19 +300,20 @@ class ProcessamentoDadosFatoEnergia:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        self.salvar_dataframe_csv('dados_tratados_energia_fato.csv')
+        # self.salvar_dataframe_csv('dados_tratados_energia_fato.csv')
         return self.dataframe
 
 
 
-# caminho_arquivo = r'C:\Users\Gilherme Alves\Documents\github\tecsus\etl\Tecsus-ETL\data\raw\pro_energia.csv'
-# banco = 'mysql+pymysql://root:1234@localhost/sonar' # url de conexao
+# caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\pro_energia.csv'
+# # banco = 'mysql+pymysql://root:12345@localhost/contas' #url de conexao
+# banco = 'mysql+pymysql://root:12345@localhost:3306/tecsusbd'
 #
-# processador = ProcessamentoDadosFato(caminho_arquivo, banco)
+# processador = ProcessamentoDadosFatoEnergia(caminho_arquivo, banco)
 # df_tratado = processador.executar_etl()
 #
 #
-# tempo = TempoFato(df_tratado)
+# tempo = TempoFatoEnergia(df_tratado)
 # tempo.conectar_banco(banco)
 # tempo.inserir_banco()
 #

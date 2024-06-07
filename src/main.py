@@ -1,14 +1,9 @@
 import os
 import glob
-from scripts.Contrato_Agua.index import *
-from scripts.Conta_agua.index import *
-from scripts.Contrato_Energia.index import *
-from scripts.Conta_Energia.index import *
-import glob
-from scripts.Contrato_Agua.index import *
-from scripts.Conta_agua.index import *
-from scripts.Contrato_Energia.index import *
-from scripts.Conta_Energia.index import *
+from src.scripts.Contrato_Agua.index import *
+from src.scripts.Conta_agua.index import *
+from src.scripts.Contrato_Energia.index import *
+from src.scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -24,7 +19,7 @@ def setup_database():
 
         with engine.connect() as connection:
 
-            connection.execute(text("DROP DATABASE IF EXISTS tecsusbd;"))
+            connection.execute(text("DROP DATABASE tecsusbd;"))
 
             connection.execute(text("CREATE DATABASE tecsusbd;"))
             connection.execute(text("USE tecsusbd;"))
@@ -202,10 +197,8 @@ def processar_dimensoes_agua(csv_file):
     try:
 
         processador = ProcessamentoDadosDimensaoAgua(csv_file)
-        processador = ProcessamentoDadosDimensaoAgua(csv_file)
         df_tratado = processador.executar_etl()
 
-        tempo = TempoDimensaoAgua(df_tratado)
         tempo = TempoDimensaoAgua(df_tratado)
         tempo.conectar_banco(banco)
         tempo.inserir_banco()
@@ -233,11 +226,11 @@ def processar_dimensoes_agua(csv_file):
 
 def processar_fato_agua(csv_file):
     try:
-        processador = ProcessamentoDadosFatoAgua(csv_file, banco)
+
         processador = ProcessamentoDadosFatoAgua(csv_file, banco)
         df_tratado = processador.executar_etl()
 
-        tempo = TempoFatoAgua(df_tratado)
+
         tempo = TempoFatoAgua(df_tratado)
         tempo.conectar_banco(banco)
         tempo.inserir_banco()
@@ -251,7 +244,6 @@ def processar_fato_agua(csv_file):
     except Exception as e:
         print(f'Erro ao processar arquivo de contrato de água {csv_file}: {e}')
 
-
 # funcao da ala energia
 def processar_dimensoes_energia(csv_file):
     try:
@@ -280,50 +272,6 @@ def processar_dimensoes_energia(csv_file):
 
     except Exception as e:
         print(f'Erro ao processar arquivo de energia {csv_file}: {e}')
-# funcao da ala energia
-def processar_dimensoes_energia(csv_file):
-    try:
-        processador = ProcessamentoDadosDimensaoEnergia(csv_file)
-        df_tratado = processador.executar_etl()
-
-        tempo = TempoDimensaoEnergia(df_tratado)
-        tempo.conectar_banco(banco)
-        tempo.inserir_banco()
-
-
-        contrato = Contrato_energia(df_tratado)
-        contrato.conectar_banco(banco)
-        contrato.inserir_banco()
-
-
-        cliente_energia = Cliente_Energia(df_tratado)
-        cliente_energia.conectar_banco(banco)
-        cliente_energia.inserir_banco()
-
-
-        medidor = Medidor_energia(df_tratado)
-        medidor.conectar_banco(banco)
-        medidor.inserir_banco()
-
-
-    except Exception as e:
-        print(f'Erro ao processar arquivo de energia {csv_file}: {e}')
-
-
-def processar_fato_energia(csv_file):
-    try:
-        processador = ProcessamentoDadosFatoEnergia(csv_file, banco)
-        df_tratado = processador.executar_etl()
-
-
-        tempo = TempoFatoEnergia(df_tratado)
-        tempo.conectar_banco(banco)
-        tempo.inserir_banco()
-
-
-        energia = FatoEnergia(df_tratado)
-        energia.conectar_banco(banco)
-        energia.inserir_banco()
 
 
 def processar_fato_energia(csv_file):
@@ -348,7 +296,7 @@ def processar_fato_energia(csv_file):
 
 def main(folder_path):
     csv_files = glob.glob(os.path.join(folder_path, '*.csv'))
-    # setup_database()
+    setup_database()
     if not csv_files:
         print('Nenhum arquivo CSV encontrado')
         return
@@ -356,12 +304,16 @@ def main(folder_path):
     for csv_file in csv_files:
         nome = os.path.basename(csv_file).lower()
         if 'con_agua' in nome:
+            print("con_agua")
             processar_dimensoes_agua(csv_file)
         elif 'con_energia' in nome:
+            print("con_energia")
             processar_dimensoes_energia(csv_file)
         elif 'pro_agua' in nome:
+            print("pro_agua")
             processar_fato_agua(csv_file)
         elif 'pro_energia' in nome:
+            print("pro_energia")
             processar_fato_energia(csv_file)
         else:
             print(f'Arquivo não reconhecido: {csv_file}')
