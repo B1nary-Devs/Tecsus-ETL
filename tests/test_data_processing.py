@@ -35,6 +35,62 @@ class TestProcessamentoDadosDimensaoAgua(unittest.TestCase):
         # Verificar se o resultado é um DataFrame (não nos preocupamos com os dados específicos aqui)
         self.assertIsInstance(resultado, pd.DataFrame)
 
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.carregar_dados')
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.salvar_dataframe_csv')
+    def test_executar_etl_falha_carregar_dados(self, mock_salvar_dataframe_csv, mock_carregar_dados):
+        # Configurar o mock para lançar uma exceção ao carregar os dados
+        mock_carregar_dados.side_effect = Exception("Erro ao carregar dados")
+
+        # Instanciar o objeto de processamento de dados
+        processador = ProcessamentoDadosDimensaoAgua('dummy_path.csv')
+
+        # Verificar se o método carregar_dados foi chamado durante a inicialização
+        mock_carregar_dados.assert_called_once()
+
+        # Verificar se o método de salvar não foi chamado durante o ETL
+        mock_salvar_dataframe_csv.assert_not_called()
+
+        # Executar o método ETL e verificar se a exceção é lançada
+        with self.assertRaises(Exception) as context:
+            processador.executar_etl()
+
+        self.assertEqual(str(context.exception), "Erro ao carregar dados")
+
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.carregar_dados')
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.salvar_dataframe_csv')
+    def test_executar_etl_falha_salvar_dados(self, mock_salvar_dataframe_csv, mock_carregar_dados):
+        # Dados de teste
+        sample_data = pd.DataFrame({
+            'coluna1': ['valor1', 'valor2'],
+            'coluna2': ['valor3', 'valor4']
+        })
+
+        # Configurar o mock para retornar os dados de teste em vez de carregar um arquivo
+        mock_carregar_dados.return_value = sample_data
+
+        # Configurar o mock para lançar uma exceção ao salvar os dados
+        mock_salvar_dataframe_csv.side_effect = Exception("Erro ao salvar dados")
+
+        # Instanciar o objeto de processamento de dados
+        processador = ProcessamentoDadosDimensaoAgua('dummy_path.csv')
+
+        # Verificar se o método carregar_dados foi chamado durante a inicialização
+        mock_carregar_dados.assert_called_once()
+
+        # Executar o método ETL
+        resultado = processador.executar_etl()
+
+        # Verificar se o método de salvar foi chamado durante o ETL
+        mock_salvar_dataframe_csv.assert_called_once()
+
+        # Verificar se o resultado é um DataFrame (não nos preocupamos com os dados específicos aqui)
+        self.assertIsInstance(resultado, pd.DataFrame)
+
+        # Verificar se a exceção é lançada ao tentar salvar os dados
+        with self.assertRaises(Exception) as context:
+            processador.salvar_dataframe_csv(resultado)
+
+        self.assertEqual(str(context.exception), "Erro ao salvar dados")
 
 class TestTempoDimensaoAgua(unittest.TestCase):
 
