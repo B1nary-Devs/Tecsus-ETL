@@ -7,8 +7,8 @@ from src.scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
-banco_sem = 'mysql+pymysql://root:12345@localhost/'
+banco = 'mysql+pymysql://sql10712676:h74UCgEvuR@sql10.freesqldatabase.com:3306/sql10712676'
+banco_sem = 'mysql+pymysql://sql10712676:h74UCgEvuR@sql10.freesqldatabase.com:3306/'
 
 
 def setup_database():
@@ -19,10 +19,10 @@ def setup_database():
 
         with engine.connect() as connection:
 
-            connection.execute(text("DROP DATABASE tecsusbd;"))
+            connection.execute(text("DROP DATABASE sql10712676;"))
 
-            connection.execute(text("CREATE DATABASE tecsusbd;"))
-            connection.execute(text("USE tecsusbd;"))
+            connection.execute(text("CREATE DATABASE sql10712676;"))
+            connection.execute(text("USE sql10712676;"))
 
             connection.execute(text("""
                 CREATE TABLE IF NOT EXISTS dim_tempo (
