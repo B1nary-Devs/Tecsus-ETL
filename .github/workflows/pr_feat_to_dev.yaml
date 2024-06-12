@@ -42,7 +42,7 @@ jobs:
         if: success()
         run: echo "Merging pull request."
         
- #função que executa o merge do pull request apos approved-pull-request tiver exito
+  #função que executa o merge do pull request apos approved-pull-request tiver exito
   automerge:
     name: Merge Pull Request
     runs-on: [ubuntu-latest]
