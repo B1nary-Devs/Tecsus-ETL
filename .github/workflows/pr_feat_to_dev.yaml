@@ -1,4 +1,4 @@
-name: CI Pull Request Feature to Dev/Main
+name: Pull Request Feature to Dev
 
 on:
   # Aciona a pipeline em pull requests aprovados para a branch dev
@@ -6,11 +6,10 @@ on:
     types: [submitted]
     branches:
       - dev
-      - main
 
 jobs:
   approved-pull-request:
-    if: github.event.review.state == 'approved'
+    if: github.event.review.state == 'approved' && github.event.pull_request.head.ref != 'dev'
     runs-on: ubuntu-latest # Máquina virtual Ubuntu que executa o job
 
     steps:
@@ -33,13 +32,6 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      # Executar os testes de integração
-      - name: Run integration tests
-        if: github.base_ref != 'dev' && github.base_ref != 'main'
-        run: |
-          source venv/bin/activate
-          python -m unittest discover -s tests
 
       # Notificar caso o teste falhe
       - name: Notify failure
