@@ -1,0 +1,6 @@
+# Ignorar diretório do ambiente virtual
+venv/
+
+# Ignorar arquivos de cache do Python
+__pycache__/
+*.py[cod]

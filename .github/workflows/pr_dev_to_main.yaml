@@ -1,7 +1,7 @@
-name: Pull Request Feature to Dev
+name: Pull Request Dev to Main
 
 on:
-  # Aciona a pipeline em pull requests aprovados para a branch dev
+  # Aciona a pipeline em pull requests aprovados para a branch main
   pull_request_review:
     types: [submitted]
     branches:
@@ -35,7 +35,6 @@ jobs:
 
       # Executar os testes de integração
       - name: Run integration tests
-        if: github.base_ref != 'dev' && github.base_ref != 'main'
         run: |
           source venv/bin/activate
           python -m unittest discover -s tests
