@@ -41,7 +41,6 @@ class TestUploadFile(unittest.TestCase):
         # Verifica se a mensagem de erro está correta
         self.assertEqual(response.json()["message"], "Falha ao processar o arquivo")
         self.assertEqual(response.json()["details"], "Test error")
-        
 
 if __name__ == '__main__':
     unittest.main()
