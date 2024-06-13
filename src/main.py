@@ -7,22 +7,43 @@ from src.scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-banco = 'mysql+pymysql://sql10712676:h74UCgEvuR@sql10.freesqldatabase.com:3306/sql10712676'
-banco_sem = 'mysql+pymysql://sql10712676:h74UCgEvuR@sql10.freesqldatabase.com:3306/'
+
+# Configurações do banco de dados
+username = 'binary'
+password = 'tecsus123@'
+host = 'tecsusbd.mysql.database.azure.com'
+database = ''  # Nome do banco de dados, se necessário
+ssl_mode = 'require'
+
+# Escapar a senha
+escaped_password = quote_plus(password)
+
+# String de conexão
+banco_sem = f'mysql+pymysql://{username}:{escaped_password}@{host}/'
+
+banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
+
 
 
 def setup_database():
 
-    engine = create_engine(banco_sem)
+    engine = create_engine(
+            banco_sem,
+            connect_args={
+                "ssl": {
+                    "ssl_mode": "REQUIRED"
+                }
+            }
+        )
 
     try:
 
         with engine.connect() as connection:
 
-            connection.execute(text("DROP DATABASE sql10712676;"))
+            connection.execute(text("DROP TABLE IF EXISTS tecsusbd;"))
 
-            connection.execute(text("CREATE DATABASE sql10712676;"))
-            connection.execute(text("USE sql10712676;"))
+            connection.execute(text("CREATE DATABASE tecsusbd;"))
+            connection.execute(text("USE tecsusbd;"))
 
             connection.execute(text("""
                 CREATE TABLE IF NOT EXISTS dim_tempo (
