@@ -1,9 +1,10 @@
 import os
 import glob
-from src.scripts.Contrato_Agua.index import *
-from src.scripts.Conta_agua.index import *
-from src.scripts.Contrato_Energia.index import *
-from src.scripts.Conta_Energia.index import *
+from urllib.parse import quote_plus
+from .scripts.Contrato_Agua.index import *
+from .scripts.Conta_agua.index import *
+from .scripts.Contrato_Energia.index import *
+from .scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
