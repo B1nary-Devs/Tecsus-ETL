@@ -7,6 +7,7 @@ from src.scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
+
 # Configurações do banco de dados
 username = 'binary'
 password = 'tecsus123@'
@@ -21,6 +22,7 @@ escaped_password = quote_plus(password)
 banco_sem = f'mysql+pymysql://{username}:{escaped_password}@{host}/'
 
 banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
+
 
 
 def setup_database():
@@ -206,11 +208,72 @@ def setup_database():
                 );
             """))
 
-            print("Banco de dados e tabelas criados com sucesso.")
-
     except SQLAlchemyError as e:
         print(f"Erro ao configurar o banco de dados: {e}")
 
+
+def create_view():
+
+    engine = create_engine(banco)
+
+    try:
+
+        with engine.connect() as connection:
+
+            connection.execute(text("""
+                CREATE 
+                    ALGORITHM = UNDEFINED 
+                    DEFINER = 'sql10712676'@'%' 
+                    SQL SECURITY DEFINER
+                VIEW sql10712676.conta_luz AS
+                    SELECT 
+                        t.data_full AS Emissao,
+                        c.horario_de_ponta AS contrato,
+                        c.nome_do_contrato AS cliente,
+                        f.consumo_fora_de_ponta_industrial AS consumo_fora_de_ponta_industrial,
+                        f.consumo_fora_de_ponta_capacidade AS consumo_fora_de_ponta_capacidade,
+                        f.demanda_de_ponta_kw AS demanda_de_ponta_kw,
+                        f.demanda_ultrapassada_kw AS demanda_ultrapassada_kw,
+                        f.total_da_fatura AS total_da_fatura
+                    FROM
+                        ((sql10712676.fato_energia_consumo f
+                        JOIN sql10712676.dim_energia_contrato c ON ((c.numero_contrato = f.numero_contrato)))
+                        JOIN sql10712676.dim_energia_tempo t ON ((f.data_id_emissao = t.data_id)));
+                        """))
+
+            print("view energia criada com sucesso.")
+
+            connection.execute(text("""
+                CREATE 
+                    ALGORITHM = UNDEFINED 
+                    DEFINER = 'sql10712676'@'%' 
+                    SQL SECURITY DEFINER
+                VIEW sql10712676.conta_agua AS
+                SELECT 
+                    f.consumo_de_agua_m3, 
+                    f.consumo_de_esgoto_m3, 
+                    f.valor_agua, 
+                    f.valor_esgoto, 
+                    c.nome_cliente, 
+                    t.data_full 
+                FROM 
+                    sql10712676.fato_agua_consumo AS f
+                LEFT JOIN 
+                    sql10712676.dim_agua_cliente c
+                ON 
+                    f.numero_cliente = c.numero_cliente
+                LEFT JOIN 
+                    sql10712676.dim_tempo t
+                ON 
+                    f.data_id_emissao = t.data_id;
+                """))
+
+            print("view agua criada com sucesso.")
+
+
+
+    except SQLAlchemyError as e:
+        print(f"Erro ao criar views: {e}")
 
 def processar_dimensoes_agua(csv_file):
     try:
@@ -336,6 +399,8 @@ def main(folder_path):
             processar_fato_energia(csv_file)
         else:
             print(f'Arquivo não reconhecido: {csv_file}')
+
+    create_view()
 
 
 
