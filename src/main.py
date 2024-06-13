@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
 banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
-banco_sem = 'mysql+pymysql://root:12345@localhost/'
+banco_sem = 'mysql+pymysql://binary:tecsus123@@tecsusbd.mysql.database.azure.com:3306/'
 
 
 def setup_database():
@@ -19,7 +19,7 @@ def setup_database():
 
         with engine.connect() as connection:
 
-            connection.execute(text("DROP DATABASE tecsusbd;"))
+            connection.execute(text("DROP TABLE IF EXISTS tecsusbd;"))
 
             connection.execute(text("CREATE DATABASE tecsusbd;"))
             connection.execute(text("USE tecsusbd;"))
