@@ -32,4 +32,4 @@ jobs:
       # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
-        run: echo "Unit tests failed. Please check the logs."
+        run: echo "Unit _tests_ failed. Please check the logs."

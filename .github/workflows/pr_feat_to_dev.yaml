@@ -37,7 +37,7 @@ jobs:
       # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
-        run: echo "Integration tests failed. Please check the logs."
+        run: echo "Integration _tests_ failed. Please check the logs."
 
       - name: Merge pull request
         if: success()
