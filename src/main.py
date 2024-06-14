@@ -1,10 +1,10 @@
 import os
 import glob
 from urllib.parse import quote_plus
-from .scripts.Contrato_Agua.index import *
-from .scripts.Conta_agua.index import *
-from .scripts.Contrato_Energia.index import *
-from .scripts.Conta_Energia.index import *
+from scripts.Contrato_Agua.index import *
+from scripts.Conta_agua.index import *
+from scripts.Contrato_Energia.index import *
+from scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -22,7 +22,7 @@ escaped_password = quote_plus(password)
 # String de conexão
 banco_sem = f'mysql+pymysql://{username}:{escaped_password}@{host}/'
 
-banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
+banco = f'mysql+pymysql://{username}:{escaped_password}@{host}/'
 
 
 
@@ -40,8 +40,8 @@ def setup_database():
     try:
 
         with engine.connect() as connection:
-
-            connection.execute(text("DROP TABLE IF EXISTS tecsusbd;"))
+            
+            connection.execute(text("DROP database tecsusbd;"))
 
             connection.execute(text("CREATE DATABASE tecsusbd;"))
             connection.execute(text("USE tecsusbd;"))
@@ -215,7 +215,14 @@ def setup_database():
 
 def create_view():
 
-    engine = create_engine(banco)
+    engine = create_engine(
+            banco,
+            connect_args={
+                "ssl": {
+                    "ssl_mode": "REQUIRED"
+                }
+            }
+        )
 
     try:
 
