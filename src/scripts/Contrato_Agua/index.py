@@ -48,6 +48,7 @@ class TempoDimensaoAgua:
             print("Conexão com o banco de dados estabelecida com sucesso.")
         except Exception as e:
             print(f"Falha ao conectar ao banco de dados: {e}")
+            raise  # Propaga a exceção
 
     def inserir_banco(self):
         if self.engine is None:
@@ -71,6 +72,8 @@ class TempoDimensaoAgua:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
+            raise  # Propaga a exceção
+
 
 
 class Contrato_agua:
