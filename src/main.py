@@ -1,10 +1,10 @@
 import os
 import glob
 from urllib.parse import quote_plus
-from .scripts.Contrato_Agua.index import *
-from .scripts.Conta_agua.index import *
-from .scripts.Contrato_Energia.index import *
-from .scripts.Conta_Energia.index import *
+from src.scripts.Contrato_Agua.index import *
+from src.scripts.Conta_agua.index import *
+from src.scripts.Contrato_Energia.index import *
+from src.scripts.Conta_Energia.index import *
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -22,7 +22,7 @@ escaped_password = quote_plus(password)
 # String de conexão
 banco_sem = f'mysql+pymysql://{username}:{escaped_password}@{host}/'
 
-banco = 'mysql+pymysql://root:12345@localhost/tecsusbd'
+banco = f'mysql+pymysql://{username}:{escaped_password}@{host}/tecsusbd' 
 
 
 
@@ -41,7 +41,7 @@ def setup_database():
 
         with engine.connect() as connection:
 
-            connection.execute(text("DROP TABLE IF EXISTS tecsusbd;"))
+            connection.execute(text("DROP DATABASE IF EXISTS tecsusbd;"))
 
             connection.execute(text("CREATE DATABASE tecsusbd;"))
             connection.execute(text("USE tecsusbd;"))
@@ -223,10 +223,7 @@ def create_view():
 
             connection.execute(text("""
                 CREATE 
-                    ALGORITHM = UNDEFINED 
-                    DEFINER = 'sql10712676'@'%' 
-                    SQL SECURITY DEFINER
-                VIEW sql10712676.conta_luz AS
+                VIEW tecsusbd.conta_luz AS
                     SELECT 
                         t.data_full AS Emissao,
                         c.horario_de_ponta AS contrato,
@@ -246,10 +243,7 @@ def create_view():
 
             connection.execute(text("""
                 CREATE 
-                    ALGORITHM = UNDEFINED 
-                    DEFINER = 'sql10712676'@'%' 
-                    SQL SECURITY DEFINER
-                VIEW sql10712676.conta_agua AS
+                VIEW tecsusbd.conta_agua AS
                 SELECT 
                     f.consumo_de_agua_m3, 
                     f.consumo_de_esgoto_m3, 
