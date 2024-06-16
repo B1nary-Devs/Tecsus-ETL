@@ -234,9 +234,9 @@ def create_view():
                         f.demanda_ultrapassada_kw AS demanda_ultrapassada_kw,
                         f.total_da_fatura AS total_da_fatura
                     FROM
-                        ((sql10712676.fato_energia_consumo f
-                        JOIN sql10712676.dim_energia_contrato c ON ((c.numero_contrato = f.numero_contrato)))
-                        JOIN sql10712676.dim_energia_tempo t ON ((f.data_id_emissao = t.data_id)));
+                        ((fato_energia_consumo f
+                        JOIN dim_energia_contrato c ON ((c.numero_contrato = f.numero_contrato)))
+                        JOIN dim_energia_tempo t ON ((f.data_id_emissao = t.data_id)));
                         """))
 
             print("view energia criada com sucesso.")
@@ -252,13 +252,13 @@ def create_view():
                     c.nome_cliente, 
                     t.data_full 
                 FROM 
-                    sql10712676.fato_agua_consumo AS f
+                    fato_agua_consumo AS f
                 LEFT JOIN 
-                    sql10712676.dim_agua_cliente c
+                    dim_agua_cliente c
                 ON 
                     f.numero_cliente = c.numero_cliente
                 LEFT JOIN 
-                    sql10712676.dim_tempo t
+                    dim_tempo t
                 ON 
                     f.data_id_emissao = t.data_id;
                 """))
