@@ -48,6 +48,7 @@ class TempoDimensaoAgua:
             print("Conexão com o banco de dados estabelecida com sucesso.")
         except Exception as e:
             print(f"Falha ao conectar ao banco de dados: {e}")
+            raise  # Propaga a exceção
 
     def inserir_banco(self):
         if self.engine is None:
@@ -71,6 +72,8 @@ class TempoDimensaoAgua:
             df_final.to_sql(name=self.tabela, con=self.engine, if_exists='append', index=False)
         except Exception as e:
             print(f"Erro ao inserir dados: {e}")
+            raise  # Propaga a exceção
+
 
 
 class Contrato_agua:
@@ -143,17 +146,17 @@ class Medidor_agua:
 class ProcessamentoDadosDimensaoAgua:
     def __init__(self, caminho_arquivo):
         self.caminho_arquivo = caminho_arquivo
-        self.dataframe = self.carregar_dados()
+        self.dataframe = pd.DataFrame()
         self.engine = None
+        try:
+            self.dataframe = self.carregar_dados()
+        except Exception as e:
+            print(f"Erro ao carregar dados na inicialização: {e}")
 
     def carregar_dados(self):
-        try:
-            df = pd.read_csv(self.caminho_arquivo)
-            df = self.preprocessar_dados(df)
-            return df
-        except Exception as e:
-            print(f"Erro ao carregar dados: {e}")
-            return pd.DataFrame()
+        df = pd.read_csv(self.caminho_arquivo)
+        df = self.preprocessar_dados(df)
+        return df
 
     def preprocessar_dados(self, df):
         colunas_renomeadas = {
@@ -188,14 +191,9 @@ class ProcessamentoDadosDimensaoAgua:
     def preparar_dimensao_tempo(self, df, colunas_data):
         id_data = 1
         for coluna in colunas_data:
-            if coluna in df.columns:
-                # Converter para datetime, usando coerce para transformar falhas em NaT
+            if (coluna in df.columns):
                 df_temp = pd.to_datetime(df[coluna], errors='coerce', dayfirst=True)
-
-                # Criar uma máscara que identifica onde as datas são válidas (não NaT)
                 mask_valid_dates = df_temp.notna()
-
-                # Inicializar a coluna de ID com None para todo o DataFrame
                 df[f'data_id_{coluna}'] = None
                 df[f'dia_{coluna}'] = None
                 df[f'mes_{coluna}'] = None
@@ -204,13 +202,9 @@ class ProcessamentoDadosDimensaoAgua:
                 df[f'semestre_{coluna}'] = None
                 df[f'dia_da_semana_{coluna}'] = None
                 df[f'mes_nome_{coluna}'] = None
-
-                # Atribuir IDs apenas nas posições onde há datas válidas
-                if mask_valid_dates.any():  # Verifica se há pelo menos uma data válida
-                    # Atribuir os IDs de forma incremental apenas onde as datas são válidas
+                if mask_valid_dates.any():
                     df.loc[mask_valid_dates, f'data_id_{coluna}'] = range(id_data, id_data + mask_valid_dates.sum())
-                    id_data += mask_valid_dates.sum()  # Incrementar o contador de ID baseado no número de datas válidas
-                    # Extrair e atribuir o dia, mês, ano, trimestre, semestre, dia da semana e nome do mês da data válida
+                    id_data += mask_valid_dates.sum()
                     df.loc[mask_valid_dates, f'dia_{coluna}'] = df_temp.dt.day
                     df.loc[mask_valid_dates, f'mes_{coluna}'] = df_temp.dt.month
                     df.loc[mask_valid_dates, f'ano_{coluna}'] = df_temp.dt.year
@@ -218,94 +212,54 @@ class ProcessamentoDadosDimensaoAgua:
                     df.loc[mask_valid_dates, f'semestre_{coluna}'] = ((df_temp.dt.month - 1) // 6) + 1
                     df.loc[mask_valid_dates, f'dia_da_semana_{coluna}'] = df_temp.dt.day_name()
                     df.loc[mask_valid_dates, f'mes_nome_{coluna}'] = df_temp.dt.month_name()
-
-
             else:
                 print(f'A coluna {coluna} não está presente no DataFrame.')
         return df
 
     def prepara_nome_contrato(self, df):
-
         df['nome_do_contrato'] = df['nome_do_contrato'].str.replace('Água/Esgoto - ', '', regex=False)
-
         return df
 
-
     def gerar_identificadores(self, df):
-        # Inicializa os contadores para os IDs
         id_contrato = 1
         id_cliente = 1
         id_medidor = 1
-
-        # Gerar IDs para contratos
         if 'nome_do_contrato' in df.columns:
             df['numero_contrato'] = range(id_contrato, id_contrato + len(df))
-            id_contrato += len(df)  # Atualiza o id_contrato para continuar a partir do último usado
-
-        # Gerar IDs para clientes, assumindo que cada cliente é tratado individualmente
+            id_contrato += len(df)
         if 'nome_cliente' in df.columns:
             df['numero_cliente'] = range(id_cliente, id_cliente + len(df))
-            id_cliente += len(df)  # Atualiza o id_cliente para continuar a partir do último usado
-
-        # Gerar IDs para medidores, assumindo que cada medidor é único
+            id_cliente += len(df)
         if 'hidrometro' in df.columns:
             df['numero_medidor'] = range(id_medidor, id_medidor + len(df))
-            id_medidor += len(df)  # Atualiza o id_medidor para continuar a partir do último usado
-
+            id_medidor += len(df)
         return df
 
     def processar_cnpj(self, df):
-        # Aplica conversão numérica somente se o valor contém 'E+'
         df['cnpj1'] = df['cnpj1'].apply(lambda x: pd.to_numeric(x, errors='coerce') if 'E+' in str(x) else x)
         df['cnpj2'] = df['cnpj2'].apply(lambda x: pd.to_numeric(x, errors='coerce') if 'E+' in str(x) else x)
-
-        # Removendo caracteres especiais
         df['cnpj1'] = df['cnpj1'].astype(str).str.replace(r'[^\d]', '', regex=True)
         df['cnpj2'] = df['cnpj2'].astype(str).str.replace(r'[^\d]', '', regex=True)
-
-        # Verificando o comprimento e ajustando para 14 dígitos se tiver 15 dígitos
         df['cnpj1'] = df['cnpj1'].apply(lambda x: x[:-1] if len(x) == 15 else x)
         df['cnpj2'] = df['cnpj2'].apply(lambda x: x[:-1] if len(x) == 15 else x)
-
-        # Tratando strings vazias como NaN
         df['cnpj1'] = df['cnpj1'].replace(r'^\s*$', pd.NA, regex=True)
         df['cnpj2'] = df['cnpj2'].replace(r'^\s*$', pd.NA, regex=True)
-
-        # Tratando CNPJs compostos inteiramente por zeros como NaN
         df['cnpj1'] = df['cnpj1'].replace(r'^0+$', pd.NA, regex=True)
         df['cnpj2'] = df['cnpj2'].replace(r'^0+$', pd.NA, regex=True)
-
-        # Preenchendo a coluna 'cnpj' com 'cnpj1' se não for nulo, caso contrário com 'cnpj2'
         df['cnpj'] = np.where(pd.notna(df['cnpj1']), df['cnpj1'], df['cnpj2'])
-
-        # Removendo linhas onde a coluna 'cnpj' é NA
         df.dropna(subset=['cnpj'], inplace=True)
-
         return df
 
     def processar_hidrometro_rgi(self, df):
-        # Removendo linhas com valores nulos ou strings vazias
         df = df.dropna(subset=['hidrometro', 'codigo_de_ligacao_rgi'])
         df = df[(df['hidrometro'].str.strip() != '') & (df['codigo_de_ligacao_rgi'].str.strip() != '')]
-
         return df
 
     def transformar_data(self, df, colunas):
         for coluna in colunas:
-            # Substitui 'Invalid date' por pd.NaT
             df[coluna] = df[coluna].replace('Invalid date', pd.NaT)
-
-            # Converte strings para datetime, assume o primeiro número como dia se ele for menor ou igual a 12
-            df[coluna] = pd.to_datetime(
-                df[coluna],
-                dayfirst=True,
-                errors='coerce'  # Converte entradas inválidas em NaT
-            )
-
-            # Agora, formata as datas válidas para o formato 'yyyy-mm-dd'
-            # e deixa como None (ou pd.NaT) as entradas que não puderam ser convertidas
+            df[coluna] = pd.to_datetime(df[coluna], dayfirst=True, errors='coerce')
             df[coluna] = df[coluna].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else None)
-
         return df
 
     def salvar_dataframe_csv(self, caminho_saida):
@@ -315,10 +269,12 @@ class ProcessamentoDadosDimensaoAgua:
             print(f"Erro ao salvar o DataFrame: {e}")
 
     def executar_etl(self):
-        # Salvando os dados tratados para revisão
-        # self.salvar_dataframe_csv('dados_tratados_dimensao_agua.csv')
-
-        return self.dataframe
+        try:
+            self.dataframe = self.carregar_dados()
+            return self.dataframe
+        except Exception as e:
+            print(f"Erro ao executar ETL: {e}")
+            return pd.DataFrame()
 
 #
 # caminho_arquivo = r'C:\Users\Marcelo\Documents\GitHub\Tecsus\Tecsus-ETL\data\raw\con_agua.csv'

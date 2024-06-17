@@ -1,0 +1,177 @@
+import unittest
+from unittest.mock import patch, MagicMock
+import pandas as pd
+from src.scripts.Contrato_Agua.index import ProcessamentoDadosDimensaoAgua, TempoDimensaoAgua
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+
+
+class Teste_etl_integracao(unittest.TestCase):
+
+    def setUp(self):
+        # Configurar o DataFrame de exemplo
+        self.sample_data = pd.DataFrame({
+            'data_id_vigencia_inicial': [1, 2],
+            'vigencia_inicial': ['2020-01-01', '2020-01-02'],
+            'dia_vigencia_inicial': [1, 2],
+            'mes_vigencia_inicial': [1, 1],
+            'ano_vigencia_inicial': [2020, 2020],
+            'trimestre_vigencia_inicial': [1, 1],
+            'semestre_vigencia_inicial': [1, 1],
+            'dia_da_semana_vigencia_inicial': ['Wednesday', 'Thursday'],
+            'mes_nome_vigencia_inicial': ['January', 'January'],
+            'data_id_vigencia_final': [3, 4],
+            'vigencia_final': ['2020-12-31', '2020-12-30'],
+            'dia_vigencia_final': [31, 30],
+            'mes_vigencia_final': [12, 12],
+            'ano_vigencia_final': [2020, 2020],
+            'trimestre_vigencia_final': [4, 4],
+            'semestre_vigencia_final': [2, 2],
+            'dia_da_semana_vigencia_final': ['Thursday', 'Wednesday'],
+            'mes_nome_vigencia_final': ['December', 'December']
+        })
+
+        # Configurar o objeto de TempoDimensaoAgua
+        self.temp_dim = TempoDimensaoAgua(self.sample_data)
+        self.temp_dim.engine = create_engine('sqlite:///:memory:')  # Usar banco de dados em memória
+
+        # Criar a tabela no banco de dados em memória
+        with self.temp_dim.engine.connect() as connection:
+            connection.execute(text("""
+            CREATE TABLE dim_tempo (
+                data_id INTEGER PRIMARY KEY,
+                data_full TEXT,
+                dia INTEGER,
+                mes INTEGER,
+                ano INTEGER,
+                trimestre INTEGER,
+                semestre INTEGER,
+                dia_da_semana TEXT,
+                mes_nome TEXT
+            )
+            """))
+
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.carregar_dados')
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.salvar_dataframe_csv')
+    def test_executar_etl_processamento_sucesso(self, mock_salvar_dataframe_csv, mock_carregar_dados):
+        # Dados de teste
+        sample_data = pd.DataFrame({
+            'coluna1': ['valor1', 'valor2'],
+            'coluna2': ['valor3', 'valor4']
+        })
+
+        # Configurar o mock para retornar os dados de teste em vez de carregar um arquivo
+        mock_carregar_dados.return_value = sample_data
+
+        # Instanciar o objeto de processamento de dados
+        processador = ProcessamentoDadosDimensaoAgua('dummy_path.csv')
+
+        # Verificar se o método carregar_dados foi chamado durante a inicialização
+        mock_carregar_dados.assert_called_once()
+
+        # Executar o método ETL
+        resultado = processador.executar_etl()
+
+        # Verificar se o método de salvar não foi chamado durante o ETL
+        mock_salvar_dataframe_csv.assert_not_called()
+
+        # Verificar se o resultado é um DataFrame
+        self.assertIsInstance(resultado, pd.DataFrame)
+
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.carregar_dados',
+           side_effect=Exception("Erro ao carregar dados"))
+    @patch('src.scripts.Contrato_Agua.index.ProcessamentoDadosDimensaoAgua.salvar_dataframe_csv')
+    def test_executar_etl_processamento_erro(self, mock_salvar_dataframe_csv, mock_carregar_dados):
+        # Instanciar o objeto de processamento de dados
+        processador = ProcessamentoDadosDimensaoAgua('dummy_path.csv')
+
+        # Executar o método ETL e capturar a saída
+        resultado = processador.executar_etl()
+
+        # Verificar se o método de salvar não foi chamado devido à falha no carregamento
+        mock_salvar_dataframe_csv.assert_not_called()
+
+        # Verificar se o resultado é um DataFrame vazio devido ao erro
+        self.assertTrue(resultado.empty)
+
+
+    def test_conectar_banco_sucesso(self):
+        with patch('src.scripts.Contrato_Agua.index.create_engine') as mock_create_engine:
+            # Configurar o mock para criar engine
+            mock_engine = MagicMock()
+            mock_create_engine.return_value = mock_engine
+
+            # Instanciar o objeto de TempoDimensaoAgua
+            df_dummy = pd.DataFrame()
+            temp_dim = TempoDimensaoAgua(df_dummy)
+
+            # Chamar o método para conectar ao banco
+            temp_dim.conectar_banco('dummy_connection_string')
+
+            # Verificar se create_engine foi chamado com a string de conexão correta
+            mock_create_engine.assert_called_once_with('dummy_connection_string')
+            self.assertIsNotNone(temp_dim.engine)
+
+    @patch('src.scripts.Contrato_Agua.index.create_engine', side_effect=SQLAlchemyError("Erro ao conectar ao banco"))
+    def test_conectar_banco_erro(self, mock_create_engine):
+        # Instanciar o objeto de TempoDimensaoAgua
+        df_dummy = pd.DataFrame()
+        temp_dim = TempoDimensaoAgua(df_dummy)
+
+        # Chamar o método para conectar ao banco e capturar exceção
+        with self.assertRaises(SQLAlchemyError):
+            temp_dim.conectar_banco('dummy_connection_string')
+
+        # Verificar se create_engine foi chamado
+        mock_create_engine.assert_called_once_with('dummy_connection_string')
+
+    @patch('src.scripts.Contrato_Agua.index.create_engine')
+    @patch('pandas.DataFrame.to_sql')
+    def test_inserir_banco_sucesso(self, mock_to_sql, mock_create_engine):
+        # Configurar o mock para criar engine
+        mock_engine = MagicMock()
+        mock_create_engine.return_value = mock_engine
+
+        # Instanciar o objeto de TempoDimensaoAgua com o mock de engine
+        temp_dim = TempoDimensaoAgua(self.sample_data)
+        temp_dim.conectar_banco('dummy_connection_string')
+
+        # Mockar a conexão
+        with patch.object(temp_dim.engine, 'connect', return_value=mock_engine):
+            temp_dim.inserir_banco()
+
+        # Verificar se o método to_sql foi chamado com os parâmetros corretos
+        mock_to_sql.assert_called_once_with(
+            name=temp_dim.tabela,
+            con=mock_engine,
+            if_exists='append',
+            index=False
+        )
+
+    @patch('src.scripts.Contrato_Agua.index.create_engine')
+    @patch('pandas.DataFrame.to_sql', side_effect=SQLAlchemyError("Erro ao inserir no banco"))
+    def test_inserir_banco_erro(self, mock_to_sql, mock_create_engine):
+        # Configurar o mock para criar engine
+        mock_engine = MagicMock()
+        mock_create_engine.return_value = mock_engine
+
+        # Instanciar o objeto de TempoDimensaoAgua com o mock de engine
+        temp_dim = TempoDimensaoAgua(self.sample_data)
+        temp_dim.conectar_banco('dummy_connection_string')
+
+        # Mockar a conexão
+        with patch.object(temp_dim.engine, 'connect', return_value=mock_engine):
+            with self.assertRaises(SQLAlchemyError):
+                temp_dim.inserir_banco()
+
+        # Verificar se o método to_sql foi chamado com os parâmetros corretos
+        mock_to_sql.assert_called_once_with(
+            name=temp_dim.tabela,
+            con=mock_engine,
+            if_exists='append',
+            index=False
+        )
+
+
+if __name__ == '__main__':
+    unittest.main()

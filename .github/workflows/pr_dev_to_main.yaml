@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements.txt
 
       # Executar os testes de integração
-      - name: Run integration tests
+      - name: Run integration _tests_
         run: |
           source venv/bin/activate
           python -m unittest discover -s tests
@@ -42,7 +42,7 @@ jobs:
       # Notificar caso o teste falhe
       - name: Notify failure
         if: failure()
-        run: echo "Integration tests failed. Please check the logs."
+        run: echo "Integration _tests_ failed. Please check the logs."
 
       - name: Merge pull request
         if: success()
