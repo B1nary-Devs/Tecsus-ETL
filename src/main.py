@@ -1,12 +1,13 @@
 import os
 import glob
 from urllib.parse import quote_plus
-from src.scripts.Contrato_Agua.index import *
-from src.scripts.Conta_agua.index import *
-from src.scripts.Contrato_Energia.index import *
-from src.scripts.Conta_Energia.index import *
+from scripts.Contrato_Agua.index import ProcessamentoDadosDimensaoAgua, Cliente_Agua, Medidor_agua, Contrato_agua, TempoDimensaoAgua
+from scripts.Conta_agua.index import ProcessamentoDadosFatoAgua, TempoFatoAgua, FatoAgua
+from scripts.Contrato_Energia.index import ProcessamentoDadosDimensaoEnergia, TempoDimensaoEnergia, Contrato_energia, Cliente_Energia, Medidor_energia
+from scripts.Conta_Energia.index import FatoEnergia, TempoFatoEnergia, ProcessamentoDadosFatoEnergia
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+
 
 
 # Configurações do banco de dados
